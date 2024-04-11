@@ -2,4 +2,3 @@ Python imports:
 requests
 json
 pandas
-openpyxl
