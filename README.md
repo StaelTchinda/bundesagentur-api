@@ -10,6 +10,6 @@ python -m venv newenv
 ```
 
 Activate the environment and install the required packages using:
-````
+```
 pip install -r requirements.txt
 ```
