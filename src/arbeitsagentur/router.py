@@ -1,8 +1,6 @@
-from typing import Optional, Text
-from enum import Enum
+from typing import Text
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 
 from src.arbeitsagentur.models.response import ApplicantSearchResponse
 from src.arbeitsagentur.models.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
@@ -25,7 +23,6 @@ def search_applicants(
     disability: Disability = None,
     page: int = 1,
     size: int = 10,
-
 ):
     search_parameters = SearchParameters(
         searchKeyword=searchKeyword,
