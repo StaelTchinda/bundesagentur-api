@@ -8,7 +8,7 @@ This repository is built on [Python 3.12](https://docs.python.org/3.12/).
 In best case, create a virtual environment with the following command.
 
 ```
-python -m venv newenv
+python -m venv venv
 ```
 
 Activate the environment and install the required packages using:
