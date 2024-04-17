@@ -20,3 +20,11 @@ pip install -r requirements.txt
 ## Tools
 
 The API is built using [FastAPI](https://fastapi.tiangolo.com/). The code is structured following [the best practices](https://github.com/zhanymkanov/fastapi-best-practices?tab=readme-ov-file).
+
+## Usage
+
+To start the API, please tun
+
+```
+python -m src.main
+```
