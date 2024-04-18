@@ -9,6 +9,10 @@ from src.arbeitsagentur.service import ApplicantApi
 
 router = APIRouter()
 
+@router.get("/applicants/custom_search", response_model=ApplicantSearchResponse)
+def custom_search_applicants():
+    #do a search filtered by the parameters relevant to seniorconnect
+    pass
 
 @router.get("/applicants/search", response_model=ApplicantSearchResponse)
 def search_applicants(
