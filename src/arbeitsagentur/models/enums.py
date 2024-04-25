@@ -50,6 +50,7 @@ class EducationType(ParamEnum):
     au = "Ausbildung", "1"
     dsa = "Duales Studium (ausbildungsintegrierend)", "2"
     dsp = "Duales Studium (praxisintegrierend)", "3"
+    undefined = "", None
 
 
 
@@ -62,6 +63,7 @@ class LocationRadius(ParamEnum):
     fifty = "50 km", 50
     hundred = "100 km", 100
     two_hundred = "200 km", 200
+    undefined = "", None
 
 
 class OfferType(ParamEnum):
@@ -69,6 +71,7 @@ class OfferType(ParamEnum):
     au = "Auszubildende/Duales Studium", 2
     pt = "Praktikanten/Trainees", 3
     se = "Selbstständige", 4
+    undefined = "", None
 
 
 class WorkingTime(ParamEnum):
@@ -77,24 +80,29 @@ class WorkingTime(ParamEnum):
     snw = "Schicht,Nacht,Wochenende", "SCHICHT_NACHTARBEIT_WOCHENENDE"
     ht = "Heim-/Telearbeit", "HEIM_TELEARBEIT"
     mj = "Minijob", "MINIJOB"
+    undefined = "", None
 
 
 class WorkExperience(ParamEnum):
     be = "Berufseinsteiger*innen", 1
     mb = "Mit Berufserfahrung", 2
+    undefined = "", None
 
 
 class ContractType(ParamEnum):
     be = "Befristet", 0
     ub = "Unbefristet", 1
+    undefined = "", None
 
 
 class Disability(ParamEnum):
     an = "Nur Schwerbehinderte oder ihnen gleichgestellte Bewerber*innen anzeigen", 1
     all = "Alle Bewerber*innen anzeigen", 2 
+    undefined = "", None
 
 
 class JobType(ParamEnum):
     ARBEIT = "Arbeit", "ARBEIT"
+    undefined = "", None
     # TODO: Add other job types
 
