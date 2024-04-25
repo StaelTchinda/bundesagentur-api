@@ -26,10 +26,12 @@ class ApplicantApi:
     def search_applicants(self, search_parameters: Optional[SearchParameters] = None):
         request_params: Dict[Text, Any] = {}
         if search_parameters is not None:
-            for key, value in search_parameters.dict().items():
+            for key, value in search_parameters.model_dump().items():
                 if value is None:
                     continue
                 if isinstance(value, ParamEnum):
+                    if value.param_value is None:
+                        continue
                     request_params[SEARCH_PARAMETERS_TO_GET_PARAMS[key]] = value.param_value
                 else:
                     request_params[SEARCH_PARAMETERS_TO_GET_PARAMS[key]] = value
