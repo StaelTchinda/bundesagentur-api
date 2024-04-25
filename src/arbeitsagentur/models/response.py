@@ -1,11 +1,12 @@
 from enum import Enum
-from typing import Dict, List, Optional, Text
+from typing import Any, Dict, List, Optional, Text
 from datetime import datetime, date
 from dataclasses import dataclass
 
+from click import Option
 from pydantic import BaseModel
 
-from src.arbeitsagentur.models.enums import WorkingTime
+from src.arbeitsagentur.models.enums import WorkingTime, JobType
 
 # TODO: better represent optional fields
 
@@ -18,7 +19,7 @@ class Erfahrung(BaseModel):
     gesamterfahrung: Optional[Text] = None  # ISO 8601 duration format
 
 class LetzteTaetigkeit(BaseModel):
-    jahr: int # TODO: Add validation for year
+    jahr: Optional[int] = None# TODO: Add validation for year
     bezeichnung: Text
     aktuell: bool
 
@@ -27,15 +28,11 @@ class Ausbildung(BaseModel):
     art: Text
 
 class Lokation(BaseModel):
-    ort: str
-    plz: int
-    umkreis: int
-    region: Text
+    ort: Optional[Text] = None
+    plz: Optional[int] = None
+    umkreis: Optional[int] = None
+    region: Optional[Text] = None
     land: Text
-
-class JobType(str, Enum):
-    ARBEIT= "ARBEIT"
-    # TODO: Add other job types
 
 class Bewerber(BaseModel):
     refnr: Text
@@ -60,6 +57,7 @@ class FacettenElement(BaseModel):
     counts: Optional[Dict[Text, int]] = None
     maxCount: int
 
+
 class Facetten(BaseModel):
     lizenzen: FacettenElement
     reisebereitschaft: FacettenElement
@@ -81,6 +79,7 @@ class Facetten(BaseModel):
     berufe: FacettenElement
     kenntnisse_erweitert: FacettenElement
     topKenntnisse: FacettenElement
+
 
 class ApplicantSearchResponse(BaseModel):
     bewerber: List[Bewerber]

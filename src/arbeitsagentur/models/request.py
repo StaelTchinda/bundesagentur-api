@@ -1,4 +1,4 @@
-from typing import Union, Text
+from typing import Union, Text, Dict
 from pydantic import BaseModel
 from src.arbeitsagentur.models.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 
@@ -16,4 +16,16 @@ class SearchParameters(BaseModel):
     page: Union[int, None]
     size: Union[int, None]
 
-
+SEARCH_PARAMETERS_TO_GET_PARAMS: Dict[Text, Text] = {
+    "searchKeyword": "was",
+    "educationType": "ausbildungsart",
+    "locationKeyword": "wo",
+    "locationRadius": "umkreis",
+    "offerType": "angebotsart",
+    "workingTime": "arbeitszeit",
+    "workExperience": "berufserfahrung",
+    "contractType": "vertragsart",
+    "disability": "behinderung",
+    "page": "page",
+    "size": "size"
+}

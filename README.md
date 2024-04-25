@@ -23,8 +23,14 @@ The API is built using [FastAPI](https://fastapi.tiangolo.com/). The code is str
 
 ## Usage
 
-To start the API, please tun
+To start the API, please run:
 
 ```
-python -m src.main
+python -m scripts.main
+```
+
+To make the server restart after code changes, please run (only for development):
+
+```
+python -m scripts.main --reload
 ```
