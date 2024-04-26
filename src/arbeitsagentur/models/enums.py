@@ -47,62 +47,60 @@ class ParamEnum(Enum):
 
 
 class EducationType(ParamEnum):
-    au = "Ausbildung", "1"
-    dsa = "Duales Studium (ausbildungsintegrierend)", "2"
-    dsp = "Duales Studium (praxisintegrierend)", "3"
-    undefined = "", None
-
-
+    TRAINING = "Ausbildung", "1"
+    DUAL_STUDY_INTEGRATED = "Duales Studium (ausbildungsintegrierend)", "2"
+    DUAL_STUDY_PRACTICE_INTEGRATED = "Duales Studium (praxisintegrierend)", "3"
+    UNDEFINED = "", None
 
 
 class LocationRadius(ParamEnum):
-    zero = "ganzer Ort", 0
-    ten = "10 km", 10
-    fifteen = "15 km", 15
-    twenty = "20 km", 20
-    fifty = "50 km", 50
-    hundred = "100 km", 100
-    two_hundred = "200 km", 200
-    undefined = "", None
+    ZERO = "ganzer Ort", 0
+    TEN = "10 km", 10
+    FIFTEEN = "15 km", 15
+    TWENTY = "20 km", 20
+    FIFTY = "50 km", 50
+    HUNDRED = "100 km", 100
+    TWO_HUNDRED = "200 km", 200
+    UNDEFINED = "", None
 
 
 class OfferType(ParamEnum):
-    ar = "Arbeitskräfte", 1
-    au = "Auszubildende/Duales Studium", 2
-    pt = "Praktikanten/Trainees", 3
-    se = "Selbstständige", 4
-    undefined = "", None
+    WORKER = "Arbeitskräfte", 1
+    TRAINEE = "Auszubildende/Duales Studium", 2
+    INTERN = "Praktikanten/Trainees", 3
+    SELF_EMPLOYED = "Selbstständige", 4
+    UNDEFINED = "", None
 
 
 class WorkingTime(ParamEnum):
-    vz = "Vollzeit", "VOLLZEIT"
-    tz = "Teilzeit", "TEILZEIT"
-    snw = "Schicht,Nacht,Wochenende", "SCHICHT_NACHTARBEIT_WOCHENENDE"
-    ht = "Heim-/Telearbeit", "HEIM_TELEARBEIT"
-    mj = "Minijob", "MINIJOB"
-    undefined = "", None
+    FULL_TIME = "Vollzeit", "VOLLZEIT"
+    PART_TIME = "Teilzeit", "TEILZEIT"
+    SHIFT_NIGHT_WEEKEND = "Schicht,Nacht,Wochenende", "SCHICHT_NACHTARBEIT_WOCHENENDE"
+    HOME_TELEWORK = "Heim-/Telearbeit", "HEIM_TELEARBEIT"
+    MINI_JOB = "Minijob", "MINIJOB"
+    UNDEFINED = "", None
 
 
 class WorkExperience(ParamEnum):
-    be = "Berufseinsteiger*innen", 1
-    mb = "Mit Berufserfahrung", 2
-    undefined = "", None
+    YOUNG_PROFESSIONAL = "Berufseinsteiger*innen", 1
+    WITH_EXPERIENCE = "Mit Berufserfahrung", 2
+    UNDEFINED = "", None
 
 
 class ContractType(ParamEnum):
-    be = "Befristet", 0
-    ub = "Unbefristet", 1
-    undefined = "", None
+    LIMITED = "Befristet", 0
+    UNLIMITED = "Unbefristet", 1
+    UNDEFINED = "", None
 
 
 class Disability(ParamEnum):
-    an = "Nur Schwerbehinderte oder ihnen gleichgestellte Bewerber*innen anzeigen", 1
-    all = "Alle Bewerber*innen anzeigen", 2 
-    undefined = "", None
+    ONLY_SEVERELY_DISABLED = "Nur Schwerbehinderte oder ihnen gleichgestellte Bewerber*innen anzeigen", 1
+    ALL = "Alle Bewerber*innen anzeigen", 2
+    UNDEFINED = "", None
 
 
 class JobType(ParamEnum):
     ARBEIT = "Arbeit", "ARBEIT"
-    undefined = "", None
+    UNDEFINED = "", None
     # TODO: Add other job types
 
