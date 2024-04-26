@@ -35,7 +35,7 @@ def iso_datestring_to_days(iso_date : str) -> int:
 @router.get("/applicants/custom_search", response_model=ApplicantSearchResponse)
 def custom_search_applicants(
     graduationYear : int = None,
-    minWorkExperienceDays : int = None,
+    minWorkExperienceYears : int = None,
     workExperienceJobs : Text = None,
     workingTime : WorkingTime = None,
     locationKeyword : Text = None
@@ -62,12 +62,12 @@ def custom_search_applicants(
                 _candidates.remove(candidate)
                 continue
 
-        if(minWorkExperienceDays is not None):
+        if(minWorkExperienceYears is not None):
             #remove candidates that don't match minWorkExperienceDays
             match = False
             if("erfahrung" in candidate.keys()):
                 experience_days = iso_datestring_to_days(candidate["erfahrung"]["gesamterfahrung"])
-                if(experience_days >= minWorkExperienceDays):
+                if(experience_days >= minWorkExperienceYears*365.25):
                     match = True
             
             if(not match):
