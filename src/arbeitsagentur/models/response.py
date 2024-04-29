@@ -147,24 +147,6 @@ class Lokation(BaseModel):
     region: Optional[Text] = None
     land: Optional[Text] = None
 
-class Bewerber(BaseModel):
-    refnr: Text
-    verfuegbarkeitVon: date  # ISO 8601 date format
-    aktualisierungsdatum: datetime  # ISO 8601 date-time format
-    veroeffentlichungsdatum: date  # ISO 8601 date format
-    stellenart: JobType
-    arbeitszeitModelle: List[WorkingTime]
-    berufe: List[Text]
-    erfahrung: Optional[Erfahrung] = None
-    letzteTaetigkeit: Optional[LetzteTaetigkeit] = None
-    ausbildungen: Optional[List[Ausbildung]] = None
-    hatEmail: bool
-    hatTelefon: bool
-    hatAdresse: bool
-    lokation: Lokation
-    mehrereArbeitsorte: bool
-    freierTitelStellengesuch: Optional[Text] = None  # Optional as not all entries have it
-
 
 class FacettenElement(BaseModel):
     counts: Optional[Dict[Text, int]] = None
@@ -200,3 +182,51 @@ class ApplicantSearchResponse(BaseModel):
     page: int
     size: int
     facetten: Facetten
+
+
+class WerdegangElement(BaseModel):
+    beschreibung: Text
+    von: date
+    bis: date
+    ort: Text
+    land: Text
+    berufsbezeichnung: Text
+    lebenslaufart: Text
+    lebenslaufartenKategorie: Text
+
+
+class Werdegang(BaseModel):
+    werdegangElemente: List[WerdegangElement]
+
+class GenericBewerber(BaseModel):
+    refnr: Text
+    verfuegbarkeitVon: date  # ISO 8601 date format
+    aktualisierungsdatum: datetime  # ISO 8601 date-time format
+    veroeffentlichungsdatum: date  # ISO 8601 date format
+    stellenart: JobType
+    arbeitszeitModelle: List[WorkingTime]
+    berufe: List[Text]
+    erfahrung: Optional[Erfahrung] = None
+    ausbildungen: Optional[List[Ausbildung]] = None
+    freierTitelStellengesuch: Optional[Text] = None  # Optional as not all entries have it
+
+
+class Bewerber(BaseModel):
+    letzteTaetigkeit: Optional[LetzteTaetigkeit] = None
+    hatEmail: bool
+    hatTelefon: bool
+    hatAdresse: bool
+    lokation: Lokation
+    mehrereArbeitsorte: bool
+
+
+class BewerberDetail(BaseModel):
+    erwartungAnDieStelle: Text
+    abschluss: Text
+    sucheNurSchwerbehinderung: bool
+    entfernungMaxKriterium: Text
+    vertragsdauer: Text
+    suchtGeringfuegigeBeschaeftigung: Text
+    lokationen: List[Lokation]
+    werdegang: List[Text]
+

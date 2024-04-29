@@ -1,0 +1,186 @@
+{
+    "refnr": "10000-1195096830-B",
+    "freierTitelStellengesuch": "München (Hybrides Modell) oder Elmshorn vor Ort",
+    "stellenart": "ARBEIT",
+    "erwartungAnDieStelle": "Zeitnaher Umzug nach Elmshorn geplant\n\nBevorzugt Konzerne oder größere Mittelständer  im Raum Elmshorn auch kleinere Unternehmen\n\nWeiterhin München-Stellen möglich, wenn hybrides Arbeiten  möglich (Unterkunft bleibt weiterhin in München vorhanden).",
+    "aktualisierungsdatum": "2024-04-18T13:45:55.985",
+    "veroeffentlichungsdatum": "2024-04-09",
+    "verfuegbarkeitVon": "2024-04-18",
+    "abschluss": "Mittlere Reife / Mittlerer Bildungsabschluss",
+    "sucheNurSchwerbehinderung": false,
+    "entfernungMaxKriterium": "NACH_UMKREIS",
+    "vertragsdauer": "ALLE",
+    "suchtGeringfuegigeBeschaeftigung": "Keine geringfügigen Beschäftigungen/ Mini-Jobs",
+    "lokationen": [
+      {
+        "ort": "München",
+        "plz": "81929",
+        "umkreis": "30",
+        "region": "Bayern",
+        "land": "Deutschland"
+      },
+      {
+        "ort": "Elmshorn",
+        "umkreis": "40",
+        "region": "Schleswig-Holstein",
+        "land": "Deutschland"
+      }
+    ],
+    "arbeitszeitModelle": [
+      "VOLLZEIT",
+      "TEILZEIT"
+    ],
+    "berufe": [
+      "Bilanzbuchhalter/in/B. Prof. Bilanzbuchhaltung",
+      "Buchhalter/in"
+    ],
+    "werdegang": [
+      {
+        "beschreibung": "Aufbau sowie fachliche und disziplinarische Führung der Buchhaltung mit drei Mitarbeitern. Erstellung des Monatsabschlusses. Vorbereitung des Jahresabschlusses nach HGB in Abstimmung mit der Steuerkanzlei.",
+        "von": "2018-04-01",
+        "bis": "2023-01-31",
+        "ort": "München",
+        "land": "Deutschland",
+        "berufsbezeichnung": "Gruppen-, Teamleiter/in",
+        "lebenslaufart": "Berufspraxis",
+        "lebenslaufartenKategorie": "WERDEGANG"
+      },
+      {
+        "beschreibung": "Kreditorenbuchhaltung & Vertragsmanagement",
+        "nameArtEinrichtung": "McDonalds Deutschland LLC",
+        "von": "2013-10-01",
+        "bis": "2016-05-31",
+        "ort": "München",
+        "land": "Deutschland",
+        "berufsbezeichnung": "Buchhalter/in",
+        "lebenslaufart": "Berufspraxis",
+        "lebenslaufartenKategorie": "WERDEGANG"
+      },
+      {
+        "beschreibung": "Field Controlling - Company Restaurants \n▪ Business Partner des regionalen Managements \n▪ P&L- und Abweichungsanalysen \n▪ Planung und Budgetierung \n▪ Erstellung eines Berichtswesens zur Ergebnissteuerung",
+        "nameArtEinrichtung": "McDonalds Deutschland LLC",
+        "von": "2016-06-01",
+        "bis": "2018-03-31",
+        "ort": "München",
+        "land": "Deutschland",
+        "berufsbezeichnung": "Controller/in",
+        "lebenslaufart": "Berufspraxis",
+        "lebenslaufartenKategorie": "WERDEGANG"
+      },
+      {
+        "von": "2023-11-20",
+        "bis": "2024-03-28",
+        "ort": "München",
+        "land": "Deutschland",
+        "berufsbezeichnung": "Buchhalter/in",
+        "lebenslaufart": "Berufspraxis",
+        "lebenslaufartenKategorie": "WERDEGANG"
+      }
+    ],
+    "bildung": [
+      {
+        "beschreibung": "Rechnungswesen, Steuern, Finanzmgmt., KLR",
+        "von": "2023-02-01",
+        "bis": "2023-07-31",
+        "ort": "München",
+        "land": "Deutschland",
+        "berufsbezeichnung": "Bilanzbuchhalter/in/B. Prof. Bilanzbuchhaltung",
+        "lebenslaufart": "Berufsausbildung (schulisch)",
+        "lebenslaufartenKategorie": "AUSBILDUNG"
+      },
+      {
+        "nameArtEinrichtung": "Hotelfachschule Heidelberg",
+        "von": "2009-09-01",
+        "bis": "2011-08-31",
+        "ort": "Heidelberg",
+        "land": "Deutschland",
+        "berufsbezeichnung": "Betriebswirt/in",
+        "istAbgeschlossen": "Ja",
+        "lebenslaufart": "Berufsausbildung (schulisch)",
+        "lebenslaufartenKategorie": "AUSBILDUNG"
+      },
+      {
+        "beschreibung": "BWL, REWE, Deutsch, Englisch etc.",
+        "nameArtEinrichtung": "Friedrich List Wirtschaftschule",
+        "von": "2001-09-01",
+        "bis": "2003-07-30",
+        "ort": "München",
+        "land": "Deutschland",
+        "istAbgeschlossen": "Ja",
+        "schulAbschluss": "Mittlere Reife / Mittlerer Bildungsabschluss",
+        "schulart": "Realschule",
+        "lebenslaufart": "Schulbildung",
+        "lebenslaufartenKategorie": "AUSBILDUNG"
+      }
+    ],
+    "mobilitaet": {
+      "fuehrerscheine": [
+        "Fahrerlaubnis B"
+      ]
+    },
+    "sprachkenntnisse": {
+      "Verhandlungssicher": [
+        "Deutsch"
+      ],
+      "Erweiterte Kenntnisse": [
+        "Englisch"
+      ],
+      "Grundkenntnisse": [
+        "Französisch"
+      ]
+    },
+    "kenntnisse": {
+      "Expertenkenntnisse": [
+        "Gewinn-und-Verlust-Rechnung"
+      ],
+      "Erweiterte Kenntnisse": [
+        "Monatsabschluss",
+        "Plankostenrechnung",
+        "Zahlungsverkehr",
+        "Kundenberatung, -betreuung",
+        "Gruppen-, Teamleitung",
+        "Investitionsplanung",
+        "Projektmanagement",
+        "Handelsrecht",
+        "Jahresabschluss",
+        "Steuererklärungen anfertigen",
+        "Datev-Programm Rechnungswesen",
+        "SAP-Modul FI (Rechnungswesen - Buchhaltung)",
+        "Finanzwirtschaft",
+        "Mahn- und Klagewesen",
+        "Kosten- und Leistungsrechnung",
+        "Finanzplanung",
+        "Buchführung, Buchhaltung",
+        "Anlagenbuchhaltung",
+        "Bilanzierung",
+        "SAP S/4HANA",
+        "Rechnungslegung nach HGB"
+      ],
+      "Grundkenntnisse": [
+        "Insolvenz- und Sanierungsrecht",
+        "Intercompany-Abstimmung",
+        "Revision",
+        "Personalplanung",
+        "Statistik"
+      ]
+    },
+    "ausbildungen": [
+      {
+        "jahr": 2011,
+        "art": "Betriebswirt/in"
+      },
+      {
+        "jahr": 2003,
+        "art": "Mittlere Reife / Mittlerer Bildungsabschluss"
+      }
+    ],
+    "erfahrung": {
+      "berufsfeldErfahrung": [
+        {
+          "berufsfeld": "Rechnungswesen, Controlling und Revision",
+          "erfahrung": "P4Y10M8D"
+        }
+      ],
+      "gesamterfahrung": "P9Y8M8D"
+    }
+  }
