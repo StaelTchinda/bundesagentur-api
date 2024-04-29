@@ -151,7 +151,7 @@ class Bewerber(BaseModel):
     aktualisierungsdatum: datetime  # ISO 8601 date-time format
     veroeffentlichungsdatum: date  # ISO 8601 date format
     stellenart: JobType
-    arbeitszeitModelle: List[WorkingTime]
+    arbeitszeitModelle: Optional[List[WorkingTime]] = None
     berufe: List[Text]
     erfahrung: Optional[Erfahrung] = None
     letzteTaetigkeit: Optional[LetzteTaetigkeit] = None
