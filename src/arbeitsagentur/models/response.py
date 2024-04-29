@@ -21,6 +21,8 @@ class TimePeriod(str):
 
     @classmethod
     def _regexp_pattern_(cls) -> str:
+        #the difference between the copilot regex and mine is that the matching groups from copilot include Y,M and D
+        #i.e. on the string '6Y5M' the first matching group will match '6Y' instead of '6'
         # regex = r'^P(\d+Y)?(\d+M)?(\d+D)?$' # CoPilot
         regex = r"P((\d+)Y)?((\d+)M)?((\d+)D)?" # Jonathan
         return regex
