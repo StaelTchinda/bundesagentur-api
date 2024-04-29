@@ -1,6 +1,7 @@
+import datetime
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Text, Union
+from typing import Any, Dict, List, Optional, Text, Union
 from tinydb import TinyDB, Query
 
 from tinydb.queries import QueryLike
@@ -36,7 +37,8 @@ class SearchedApplicantsDb:
         return self.db.search(query)
 
     def get_all(self):
-        return self.db.all()
+        results = self.db.all()
+        return [self._unserealize_object_(result) for result in results]
 
     def update(self, query: QueryLike, data):
         self.db.update(data, query)
@@ -62,9 +64,20 @@ class SearchedApplicantsDb:
         self.db.close()
 
     def _serialize_object_(self, applicant: Bewerber) -> Dict:
-        applicant_json = json.dumps(applicant.__dict__, default=str)
+        def default_json_dumps(obj: Any):
+            if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
+                return str(obj)
+            elif isinstance(obj, Enum):
+                return obj.value
+            elif hasattr(obj, "__dict__"):
+                return obj.__dict__
+            return str(obj)
+        applicant_json = json.dumps(applicant.__dict__, default=default_json_dumps)
         applicant_serializable_dict = json.loads(applicant_json)
         return applicant_serializable_dict
+    
+    def _unserealize_object_(self, applicant_dict: Dict) -> Bewerber:
+        return Bewerber(**applicant_dict)
 
 
 class LocalSearchParameters:
