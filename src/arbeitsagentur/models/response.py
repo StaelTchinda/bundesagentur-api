@@ -184,19 +184,27 @@ class ApplicantSearchResponse(BaseModel):
     facetten: Facetten
 
 
-class WerdegangElement(BaseModel):
-    beschreibung: Text
+#it would be good to get a full list of attributes these elements 
+#can have and whether they are optional. This is just my best guess so far
+class LebenslaufElement(BaseModel):
     von: date
     bis: date
     ort: Text
     land: Text
     berufsbezeichnung: Text
     lebenslaufart: Text
+    berufsbezeichnung: Optional[Text]
+    beschreibung: Optional[Text]
+    istAbgeschlossen: Optional[Text]
     lebenslaufartenKategorie: Text
+    nameArtEinrichtung: Optional[Text]
+    schulAbschluss: Optional[Text]
+    schulart: Optional[Text]
 
-
-class Werdegang(BaseModel):
-    werdegangElemente: List[WerdegangElement]
+class Kenntnisse(BaseModel):
+    Expertenkenntnisse: List[Text]
+    ErweiterteKenntnisse: List[Text]
+    Grundkenntnisse: List[Text]
 
 class GenericBewerber(BaseModel):
     refnr: Text
@@ -211,7 +219,7 @@ class GenericBewerber(BaseModel):
     freierTitelStellengesuch: Optional[Text] = None  # Optional as not all entries have it
 
 
-class Bewerber(BaseModel):
+class BewerberUebersicht(GenericBewerber):
     letzteTaetigkeit: Optional[LetzteTaetigkeit] = None
     hatEmail: bool
     hatTelefon: bool
@@ -220,7 +228,7 @@ class Bewerber(BaseModel):
     mehrereArbeitsorte: bool
 
 
-class BewerberDetail(BaseModel):
+class BewerberDetail(GenericBewerber):
     erwartungAnDieStelle: Text
     abschluss: Text
     sucheNurSchwerbehinderung: bool
@@ -228,5 +236,12 @@ class BewerberDetail(BaseModel):
     vertragsdauer: Text
     suchtGeringfuegigeBeschaeftigung: Text
     lokationen: List[Lokation]
-    werdegang: List[Text]
+    werdegang: List[LebenslaufElement]
+    bildung: List[LebenslaufElement]
+    mobilitaet: List #not sure what elements are possible here
+    sprachkenntnisse: List[Kenntnisse]
+    kenntnisse: List[Kenntnisse]
+    ausbildungen: List[Ausbildung]
+    erfahrung: Erfahrung
+
 
