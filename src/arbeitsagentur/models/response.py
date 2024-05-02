@@ -59,9 +59,9 @@ class TimePeriod(str):
         n_months    = search.group(4)
         n_days      = search.group(6)
         time_period = {
-            'years': n_years if n_years is None else int(n_years),
-            'months': n_months if n_months is None else int(n_months),
-            'days': n_days if n_days is None else int(n_days)
+            'years': 0 if n_years is None else int(n_years),
+            'months': 0 if n_months is None else int(n_months),
+            'days': 0 if n_days is None else int(n_days)
         }
         return time_period
 
