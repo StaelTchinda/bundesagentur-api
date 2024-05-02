@@ -145,6 +145,21 @@ class Lokation(BaseModel):
     region: Optional[Text] = None
     land: Optional[Text] = None
 
+    def check_location(self, locationKeyword: Text) -> bool:
+        if locationKeyword is None:
+            raise ValueError("LocationKeyword is None")
+        
+        if self.ort is not None and locationKeyword in self.ort:
+            return True
+        elif self.plz is not None and locationKeyword in str(self.plz):
+            return True
+        elif self.region is not None and locationKeyword in self.region:
+            return True
+        elif self.land is not None and locationKeyword in self.land:
+            return True
+        return False
+
+
 class Bewerber(BaseModel):
     refnr: Text
     verfuegbarkeitVon: date  # ISO 8601 date format
