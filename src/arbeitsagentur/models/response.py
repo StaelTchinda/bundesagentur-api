@@ -59,9 +59,9 @@ class TimePeriod(str):
         n_months    = search.group(4)
         n_days      = search.group(6)
         time_period = {
-            'years': n_years if n_years is None else int(n_years),
-            'months': n_months if n_months is None else int(n_months),
-            'days': n_days if n_days is None else int(n_days)
+            'years': 0 if n_years is None else int(n_years),
+            'months': 0 if n_months is None else int(n_months),
+            'days': 0 if n_days is None else int(n_days)
         }
         return time_period
 
@@ -145,13 +145,28 @@ class Lokation(BaseModel):
     region: Optional[Text] = None
     land: Optional[Text] = None
 
+    def check_location(self, locationKeyword: Text) -> bool:
+        if locationKeyword is None:
+            raise ValueError("LocationKeyword is None")
+        
+        if self.ort is not None and locationKeyword in self.ort:
+            return True
+        elif self.plz is not None and locationKeyword in str(self.plz):
+            return True
+        elif self.region is not None and locationKeyword in self.region:
+            return True
+        elif self.land is not None and locationKeyword in self.land:
+            return True
+        return False
+
+
 class Bewerber(BaseModel):
     refnr: Text
     verfuegbarkeitVon: date  # ISO 8601 date format
     aktualisierungsdatum: datetime  # ISO 8601 date-time format
     veroeffentlichungsdatum: date  # ISO 8601 date format
     stellenart: JobType
-    arbeitszeitModelle: List[WorkingTime]
+    arbeitszeitModelle: Optional[List[WorkingTime]] = None
     berufe: List[Text]
     erfahrung: Optional[Erfahrung] = None
     letzteTaetigkeit: Optional[LetzteTaetigkeit] = None

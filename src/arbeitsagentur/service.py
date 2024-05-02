@@ -37,7 +37,7 @@ class ApplicantApi:
                     request_params[SEARCH_PARAMETERS_TO_GET_PARAMS[key]] = value
         logger.info(f"Searching applicants with the following parameters: {request_params}")
         response = requests.get(self.api_search_url, headers={'OAuthAccessToken': self.token}, params=request_params)
-        logger.info(f"Received response: {response.json()}")
+        logger.info(f"Received response with status code {response.status_code} and keys {response.json().keys()}")
         return response.json()
 
     def get_applicant(self, applicant_id: Text):
