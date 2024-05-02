@@ -120,6 +120,8 @@ def local_search(
 ):
     candidates = local_filter(maxGraduationYear, minWorkExperienceYears, careerField, workingTime, locationKeyword)
 
+    logger.info(f"Found in total {len(candidates)} candidates")
+
     candidates = candidates[(page-1)*size:page*size+size]
 
     return candidates
