@@ -98,6 +98,9 @@ def fetch_applicant_resumes(
         if "messages" in search_result_dict:
             logger.warning(f"Error while fetching resumes: {search_result_dict['messages']}")
             raise HTTPException(status_code=400, detail=search_result_dict["messages"])
+        elif "bewerber" not in search_result_dict:
+            logger.warning(f"No applicants found on page {page_idx + 1}")
+            break
         search_result: ApplicantSearchResponse = ApplicantSearchResponse(**search_result_dict)
         for applicant in search_result.bewerber:
             db.upsert(applicant)
