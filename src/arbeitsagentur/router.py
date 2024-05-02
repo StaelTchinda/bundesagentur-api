@@ -1,13 +1,12 @@
-from re import T
-from typing import Callable, Dict, Optional, Text
-from fastapi import APIRouter
+from typing import Dict, Optional, Text
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from tinydb import Query
 from tinydb.queries import QueryInstance
 import logging
 
 from src.arbeitsagentur.models.db.nosql import SearchedApplicantsDb
-from src.arbeitsagentur.models.response import ApplicantSearchResponse, TimePeriod
+from src.arbeitsagentur.models.response import ApplicantSearchResponse, Lokation, TimePeriod
 from src.arbeitsagentur.models.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 from src.arbeitsagentur.models.request import SearchParameters
 from src.arbeitsagentur.service import ApplicantApi
@@ -95,6 +94,10 @@ def fetch_applicant_resumes(
             size=size,
         )
         search_result_dict: Dict = api.search_applicants(search_parameters)
+        logger.info(f"Fetching resumes from page {page_idx + 1}: {search_result_dict}")
+        if "messages" in search_result_dict:
+            logger.warning(f"Error while fetching resumes: {search_result_dict['messages']}")
+            raise HTTPException(status_code=400, detail=search_result_dict["messages"])
         search_result: ApplicantSearchResponse = ApplicantSearchResponse(**search_result_dict)
         for applicant in search_result.bewerber:
             db.upsert(applicant)
@@ -103,42 +106,42 @@ def fetch_applicant_resumes(
 
 
 
+
 @router.get("/applicants/local_search", response_class=JSONResponse)
-def search_applicant_resumes(
-    minGraduationYear : int | None = None,
+def local_search(
+    maxGraduationYear : int | None = None,
     minWorkExperienceYears : int | None = None,
-    workExperienceJobs : Text | None = None,
+    careerField : Text | None = None,
     workingTime: WorkingTime = WorkingTime.UNDEFINED,
     locationKeyword: Text | None = None,
 
     page: int = 1,
     size: int = 25,
 ):
+    candidates = local_filter(maxGraduationYear, minWorkExperienceYears, careerField, workingTime, locationKeyword)
+
+    candidates = candidates[(page-1)*size:page*size+size]
+
+    return candidates
+
+
+def local_filter(
+    maxGraduationYear : int | None = None,
+    minWorkExperienceYears : int | None = None,
+    careerField : Text | None = None,
+    workingTime: WorkingTime = WorkingTime.UNDEFINED,
+    locationKeyword: Text | None = None,
+):
     db = SearchedApplicantsDb()
 
     query: Optional[QueryInstance] = None
 
-    # for candidate in _candidates:
-    #     if("ausbildungen" in candidate.keys()):
-    #         for education in candidate["ausbildungen"]:
-    #             accepted_educations = ["Mittlere Reife / Mittlerer Bildungsabschluss", "Hauptschulabschluss"]
-    #             print(education["art"])
-    #             if(education["art"] in accepted_educations and int(education["jahr"]) == graduationYear):
-    #                 match = True
-    #                 break
-
-    #     if(not match):
-    #         _candidates.remove(candidate)
-    #         continue
-
-    if minGraduationYear is not None:
+    if maxGraduationYear is not None:
         _applicant = Query()
         _education = Query()
-        accepted_educations = ["Mittlere Reife / Mittlerer Bildungsabschluss", "Hauptschulabschluss"]
-        subquery = _applicant.ausbildungen.exists() \
+        subquery = _applicant.ausbildungen.exists()  \
                     & _applicant.ausbildungen.any(
-                        # _education.art.one_of(accepted_educations) \
-                        (_education.jahr >= minGraduationYear)
+                        (_education.jahr <= maxGraduationYear)
                     )
 
         if query is None:
@@ -159,14 +162,45 @@ def search_applicant_resumes(
         else:
             query &= subquery
 
+    if careerField is not None:
+        _applicant = Query()
+        _experience = Query()
+        subquery = _applicant.erfahrung.exists() \
+                    & _applicant.erfahrung.berufsfeldErfahrung.exists() \
+                    & _applicant.erfahrung.berufsfeldErfahrung.any(
+                        (_experience.berufsfeld.search(careerField))
+                    )
 
-    print(f"Query: {query}")
+        if query is None:
+            query = subquery
+        else:
+            query &= subquery
+
+    if workingTime is not None and workingTime != WorkingTime.UNDEFINED:
+        _applicant = Query()
+        subquery = _applicant.arbeitszeitModelle.any(workingTime.value)
+
+        if query is None:
+            query = subquery
+        else:
+            query &= subquery
+
+    if locationKeyword is not None:
+        _applicant = Query()
+        subquery = _applicant.lokation.exists() \
+                    & _applicant.lokation.test(lambda x: Lokation(**x).check_location(locationKeyword))
+
+        if query is None:
+            query = subquery
+        else:
+            query &= subquery
+
+
+    logger.info(f"Query: {query}")
 
     if query is not None:
         candidates = db.get(query)
     else:
         candidates = db.get_all()
-
-    candidates = candidates[page*size:page*size+size]
 
     return candidates
