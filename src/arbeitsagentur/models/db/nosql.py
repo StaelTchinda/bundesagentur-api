@@ -25,6 +25,19 @@ class DetailedApplicantsDb:
         applicant_serializable_dict = self._serialize_object_(applicant)
         self.db.insert(applicant_serializable_dict)
 
+    def _serialize_object_(self, applicant: BewerberDetail) -> Dict:
+        applicant_json = json.dumps(applicant.__dict__, default=str)
+        applicant_serializable_dict = json.loads(applicant_json)
+        return applicant_serializable_dict
+    
+    def upsert(self, applicant: BewerberDetail):
+        query = Query()
+        if self.db.contains(query.refnr == applicant.refnr):
+            serializable_dict = self._serialize_object_(applicant)
+            self.db.upsert(serializable_dict, Query().refnr == applicant.refnr)
+        else:
+            self.insert(applicant)
+
 
 class SearchedApplicantsDb:
     def __init__(self, db_path: PathLike = "data/db/applicants.json"):

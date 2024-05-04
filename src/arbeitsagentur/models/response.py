@@ -5,7 +5,7 @@ from datetime import datetime, date
 from dataclasses import dataclass, field
 
 from click import Option
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field, AliasChoices
 
 from src.arbeitsagentur.models.enums import WorkingTime, JobType
 
@@ -209,35 +209,39 @@ class Facetten(BaseModel):
     topKenntnisse: FacettenElement
 
 
-class ApplicantSearchResponse(BaseModel):
-    bewerber: List[Bewerber]
-    maxErgebnisse: int
-    page: int
-    size: int
-    facetten: Facetten
-
-
 #it would be good to get a full list of attributes these elements 
 #can have and whether they are optional. This is just my best guess so far
 class LebenslaufElement(BaseModel):
     von: date
     bis: date
-    ort: Text
+    ort: Optional[Text] = None
     land: Text
     berufsbezeichnung: Text
     lebenslaufart: Text
-    berufsbezeichnung: Optional[Text]
-    beschreibung: Optional[Text]
-    istAbgeschlossen: Optional[Text]
-    lebenslaufartenKategorie: Text
-    nameArtEinrichtung: Optional[Text]
-    schulAbschluss: Optional[Text]
-    schulart: Optional[Text]
+    berufsbezeichnung: Optional[Text] = None
+    beschreibung: Optional[Text] = None
+    istAbgeschlossen: Optional[Text] = None
+    lebenslaufartenKategorie: Text = None
+    nameArtEinrichtung: Optional[Text] = None
+    schulAbschluss: Optional[Text] = None
+    schulart: Optional[Text] = None
 
 class Kenntnisse(BaseModel):
-    Expertenkenntnisse: List[Text]
-    ErweiterteKenntnisse: List[Text]
-    Grundkenntnisse: List[Text]
+    Expertenkenntnisse: Optional[List[Text]] = Field(validation_alias=AliasChoices('Expertenkenntnisse', 'Verhandlungssicher'), default=None)
+    ErweiterteKenntnisse: Optional[List[Text]] = Field(validation_alias=AliasChoices('Erweiterte Kenntnisse'), default=None)
+    Grundkenntnisse: Optional[List[Text]] = None
+
+
+class Lizenz(BaseModel):
+    bezeichnung: Text
+    gueltigVon: Text
+
+
+class Mobilitaet(BaseModel):
+    reisebereitschaft: Optional[Text] = None
+    fuehrerscheine: List[Text] = None
+    fahrzeugVorhanden: Optional[bool] = None
+
 
 class GenericBewerber(BaseModel):
     refnr: Text
@@ -262,19 +266,32 @@ class BewerberUebersicht(GenericBewerber):
 
 
 class BewerberDetail(GenericBewerber):
-    erwartungAnDieStelle: Text
+    erwartungAnDieStelle: Optional[Text] = None
     abschluss: Text
     sucheNurSchwerbehinderung: bool
     entfernungMaxKriterium: Text
     vertragsdauer: Text
-    suchtGeringfuegigeBeschaeftigung: Text
+    suchtGeringfuegigeBeschaeftigung: Optional[Text] = None
     lokationen: List[Lokation]
     werdegang: List[LebenslaufElement]
     bildung: List[LebenslaufElement]
-    mobilitaet: List #not sure what elements are possible here
-    sprachkenntnisse: List[Kenntnisse]
-    kenntnisse: List[Kenntnisse]
+    mobilitaet: Mobilitaet #not sure what elements are possible here
+    sprachkenntnisse: Kenntnisse
+    kenntnisse: Kenntnisse
     ausbildungen: List[Ausbildung]
     erfahrung: Erfahrung
+    softskills: Optional[List[Text]] = None
+    lizenzen: Optional[List[Lizenz]] = None
 
 
+class ApplicantSearchResponse(BaseModel):
+    bewerber: List[BewerberUebersicht]
+    maxErgebnisse: int
+    page: int
+    size: int
+    facetten: Facetten
+
+
+class DetailedApplicantSearchResponse(BaseModel):
+    count: int
+    applicants: List[BewerberDetail]
