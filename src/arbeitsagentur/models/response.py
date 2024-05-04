@@ -162,25 +162,6 @@ class Lokation(BaseModel):
         return False
 
 
-class Bewerber(BaseModel):
-    refnr: Text
-    verfuegbarkeitVon: date  # ISO 8601 date format
-    aktualisierungsdatum: datetime  # ISO 8601 date-time format
-    veroeffentlichungsdatum: date  # ISO 8601 date format
-    stellenart: JobType
-    arbeitszeitModelle: Optional[List[WorkingTime]] = None
-    berufe: List[Text]
-    erfahrung: Optional[Erfahrung] = None
-    letzteTaetigkeit: Optional[LetzteTaetigkeit] = None
-    ausbildungen: Optional[List[Ausbildung]] = None
-    hatEmail: bool
-    hatTelefon: bool
-    hatAdresse: bool
-    lokation: Lokation
-    mehrereArbeitsorte: bool
-    freierTitelStellengesuch: Optional[Text] = None  # Optional as not all entries have it
-
-
 class FacettenElement(BaseModel):
     counts: Optional[Dict[Text, int]] = None
     maxCount: int
@@ -212,10 +193,10 @@ class Facetten(BaseModel):
 #it would be good to get a full list of attributes these elements 
 #can have and whether they are optional. This is just my best guess so far
 class LebenslaufElement(BaseModel):
-    von: date
-    bis: date
+    von: Optional[date] = None
+    bis: Optional[date] = None
     ort: Optional[Text] = None
-    land: Text
+    land: Optional[Text] = None
     berufsbezeichnung: Text
     lebenslaufart: Text
     berufsbezeichnung: Optional[Text] = None
@@ -266,22 +247,22 @@ class BewerberUebersicht(GenericBewerber):
 
 
 class BewerberDetail(GenericBewerber):
-    erwartungAnDieStelle: Optional[Text] = None
-    abschluss: Text
-    sucheNurSchwerbehinderung: bool
-    entfernungMaxKriterium: Text
-    vertragsdauer: Text
-    suchtGeringfuegigeBeschaeftigung: Optional[Text] = None
-    lokationen: List[Lokation]
-    werdegang: List[LebenslaufElement]
-    bildung: List[LebenslaufElement]
-    mobilitaet: Mobilitaet #not sure what elements are possible here
-    sprachkenntnisse: Kenntnisse
-    kenntnisse: Kenntnisse
-    ausbildungen: List[Ausbildung]
-    erfahrung: Erfahrung
-    softskills: Optional[List[Text]] = None
-    lizenzen: Optional[List[Lizenz]] = None
+    erwartungAnDieStelle:               Optional[Text]                      = None
+    abschluss:                          Optional[Text]                      = None
+    sucheNurSchwerbehinderung:          bool
+    entfernungMaxKriterium:             Text
+    vertragsdauer:                      Text
+    suchtGeringfuegigeBeschaeftigung:   Optional[Text]                      = None
+    lokationen:                         Optional[List[Lokation]]            = None
+    werdegang:                          Optional[List[LebenslaufElement]]   = None
+    bildung:                            Optional[List[LebenslaufElement]]   = None
+    mobilitaet:                         Optional[Mobilitaet]                = None #not sure what elements are possible here
+    sprachkenntnisse:                   Optional[Kenntnisse]                = None
+    kenntnisse:                         Optional[Kenntnisse]                = None
+    ausbildungen:                       Optional[List[Ausbildung]]          = None
+    erfahrung:                          Optional[Erfahrung]                 = None
+    softskills:                         Optional[List[Text]]                = None
+    lizenzen:                           Optional[List[Lizenz]]              = None
 
 
 class ApplicantSearchResponse(BaseModel):

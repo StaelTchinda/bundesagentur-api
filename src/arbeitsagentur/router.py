@@ -217,15 +217,14 @@ def local_filter(
 
 
 @router.get("/applicants/fetch_detailed_resumes", response_class=JSONResponse)
-def fetch_applicant_details(applicant_ids: Annotated[list[str]|None, fastapi.Query()] = None):
+def fetch_applicant_details(applicant_ids: str):
+    #for some reason the input won't display as a list in the doc gui, so we'll just have to go with comma separated list for now
     db = DetailedApplicantsDb()
+    
     resumelist : List = []
-    print("hello")
+    applicant_ids = applicant_ids.split(",")
     for applicant_id in applicant_ids:
-        print(applicant_id)
         applicant_detail = BewerberDetail(**get_applicant(applicant_id=applicant_id))
-        print(applicant_detail)
-        print(type(applicant_detail))
         resumelist.append(applicant_detail)
         db.upsert(applicant_detail)
 

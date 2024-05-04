@@ -88,7 +88,7 @@ class SearchedApplicantsDb:
     def __del__(self):
         self.db.close()
 
-    def _serialize_object_(self, applicant: Bewerber) -> Dict:
+    def _serialize_object_(self, applicant: BewerberUebersicht) -> Dict:
         def default_json_dumps(obj: Any):
             if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
                 return str(obj)
@@ -101,8 +101,8 @@ class SearchedApplicantsDb:
         applicant_serializable_dict = json.loads(applicant_json)
         return applicant_serializable_dict
     
-    def _unserealize_object_(self, applicant_dict: Dict) -> Bewerber:
-        return Bewerber(**applicant_dict)
+    def _unserealize_object_(self, applicant_dict: Dict) -> BewerberUebersicht:
+        return BewerberUebersicht(**applicant_dict)
 
 
 class LocalSearchParameters:
