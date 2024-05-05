@@ -43,7 +43,7 @@ class KnowledgeDb:
         resultlist = []
         for db in self.dblist:
             results = db.all()
-            resultlist.extend([self._unserealize_object_(result) for result in results]) #use .append or .extend in these cases?
+            resultlist.extend([self._unserealize_object_(result) for result in results]) #use .append or .extend in these cases? 
         return resultlist
     """
     Retrieves all the records from the database.
@@ -56,7 +56,7 @@ class KnowledgeDb:
         querylist = []
         for db in self.dblist:
             results = db.search()
-            querylist.extend(self._unserealize_object(result) for result in results) # use .append or .extend?
+            querylist.extend(self._unserealize_object(result) for result in results) # use .append or .extend? #does the argument have to be in suqare brackets?
         return querylist
 
     """
