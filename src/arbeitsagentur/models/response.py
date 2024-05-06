@@ -5,7 +5,7 @@ from datetime import datetime, date
 from dataclasses import dataclass, field
 
 from click import Option
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field, AliasChoices
 
 from src.arbeitsagentur.models.enums import WorkingTime, JobType
 
@@ -21,7 +21,6 @@ class TimePeriod(str):
 
     @classmethod
     def _regexp_pattern_(cls) -> str:
-        # regex = r'^P(\d+Y)?(\d+M)?(\d+D)?$' # CoPilot
         regex = r"P((\d+)Y)?((\d+)M)?((\d+)D)?" # Jonathan
         return regex
     
@@ -160,25 +159,6 @@ class Lokation(BaseModel):
         return False
 
 
-class Bewerber(BaseModel):
-    refnr: Text
-    verfuegbarkeitVon: date  # ISO 8601 date format
-    aktualisierungsdatum: datetime  # ISO 8601 date-time format
-    veroeffentlichungsdatum: date  # ISO 8601 date format
-    stellenart: JobType
-    arbeitszeitModelle: Optional[List[WorkingTime]] = None
-    berufe: List[Text]
-    erfahrung: Optional[Erfahrung] = None
-    letzteTaetigkeit: Optional[LetzteTaetigkeit] = None
-    ausbildungen: Optional[List[Ausbildung]] = None
-    hatEmail: bool
-    hatTelefon: bool
-    hatAdresse: bool
-    lokation: Lokation
-    mehrereArbeitsorte: bool
-    freierTitelStellengesuch: Optional[Text] = None  # Optional as not all entries have it
-
-
 class FacettenElement(BaseModel):
     counts: Optional[Dict[Text, int]] = None
     maxCount: int
@@ -207,9 +187,89 @@ class Facetten(BaseModel):
     topKenntnisse: FacettenElement
 
 
+#it would be good to get a full list of attributes these elements 
+#can have and whether they are optional. This is just my best guess so far
+class LebenslaufElement(BaseModel):
+    von: Optional[date] = None
+    bis: Optional[date] = None
+    ort: Optional[Text] = None
+    land: Optional[Text] = None
+    berufsbezeichnung: Text
+    lebenslaufart: Text
+    berufsbezeichnung: Optional[Text] = None
+    beschreibung: Optional[Text] = None
+    istAbgeschlossen: Optional[Text] = None
+    lebenslaufartenKategorie: Text = None
+    nameArtEinrichtung: Optional[Text] = None
+    schulAbschluss: Optional[Text] = None
+    schulart: Optional[Text] = None
+
+class Kenntnisse(BaseModel):
+    Expertenkenntnisse: Optional[List[Text]] = Field(validation_alias=AliasChoices('Expertenkenntnisse', 'Verhandlungssicher'), default=None)
+    ErweiterteKenntnisse: Optional[List[Text]] = Field(validation_alias=AliasChoices('Erweiterte Kenntnisse'), default=None)
+    Grundkenntnisse: Optional[List[Text]] = None
+
+
+class Lizenz(BaseModel):
+    bezeichnung: Text
+    gueltigVon: Text
+
+
+class Mobilitaet(BaseModel):
+    reisebereitschaft: Optional[Text] = None
+    fuehrerscheine: List[Text] = None
+    fahrzeugVorhanden: Optional[bool] = None
+
+
+class GenericBewerber(BaseModel):
+    refnr: Text
+    verfuegbarkeitVon: date  # ISO 8601 date format
+    aktualisierungsdatum: datetime  # ISO 8601 date-time format
+    veroeffentlichungsdatum: date  # ISO 8601 date format
+    stellenart: JobType
+    arbeitszeitModelle: List[WorkingTime]
+    berufe: List[Text]
+    erfahrung: Optional[Erfahrung] = None
+    ausbildungen: Optional[List[Ausbildung]] = None
+    freierTitelStellengesuch: Optional[Text] = None  # Optional as not all entries have it
+
+
+class BewerberUebersicht(GenericBewerber):
+    letzteTaetigkeit: Optional[LetzteTaetigkeit] = None
+    hatEmail: bool
+    hatTelefon: bool
+    hatAdresse: bool
+    lokation: Lokation
+    mehrereArbeitsorte: bool
+
+
+class BewerberDetail(GenericBewerber):
+    erwartungAnDieStelle: Optional[Text] = None
+    abschluss: Optional[Text] = None
+    sucheNurSchwerbehinderung: bool
+    entfernungMaxKriterium: Text
+    vertragsdauer: Text
+    suchtGeringfuegigeBeschaeftigung: Optional[Text] = None
+    lokationen: Optional[List[Lokation]] = None
+    werdegang: Optional[List[LebenslaufElement]] = None
+    bildung: Optional[List[LebenslaufElement]] = None
+    mobilitaet: Optional[Mobilitaet] = None #not sure what elements are possible here
+    sprachkenntnisse: Optional[Kenntnisse] = None
+    kenntnisse: Optional[Kenntnisse] = None
+    ausbildungen: Optional[List[Ausbildung]] = None
+    erfahrung: Optional[Erfahrung] = None
+    softskills: Optional[List[Text]] = None
+    lizenzen: Optional[List[Lizenz]] = None
+
+
 class ApplicantSearchResponse(BaseModel):
-    bewerber: List[Bewerber]
+    bewerber: List[BewerberUebersicht]
     maxErgebnisse: int
     page: int
     size: int
     facetten: Facetten
+
+
+class DetailedApplicantSearchResponse(BaseModel):
+    count: int
+    applicants: List[BewerberDetail]

@@ -1,16 +1,19 @@
-from typing import Dict, Optional, Text
+from re import T
+from typing import Annotated, Callable, Dict, Optional, Text, List
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from tinydb import Query
 from tinydb.queries import QueryInstance
 import logging
 
-from src.arbeitsagentur.models.db.nosql import SearchedApplicantsDb
-from src.arbeitsagentur.models.response import ApplicantSearchResponse, Lokation, TimePeriod
+from src.arbeitsagentur.models.db.nosql import SearchedApplicantsDb, DetailedApplicantsDb
+from src.arbeitsagentur.models.response import ApplicantSearchResponse, TimePeriod, Lokation, BewerberDetail, DetailedApplicantSearchResponse
 from src.arbeitsagentur.models.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 from src.arbeitsagentur.models.request import SearchParameters
 from src.arbeitsagentur.service import ApplicantApi
 from src.configs import DEFAULT_LOGGING_CONFIG
+
+import fastapi
 
 router = APIRouter()
 
@@ -209,3 +212,25 @@ def local_filter(
         candidates = db.get_all()
 
     return candidates
+
+
+
+
+@router.get("/applicants/fetch_detailed_resumes", response_class=JSONResponse)
+def fetch_applicant_details(applicant_ids: str):
+    #for some reason the input won't display as a list in the doc gui, so we'll just have to go with comma separated list for now
+    db = DetailedApplicantsDb()
+    
+    resumelist : List = []
+    applicant_ids = applicant_ids.split(",")
+    for applicant_id in applicant_ids:
+        applicant_detail = BewerberDetail(**get_applicant(applicant_id=applicant_id))
+        resumelist.append(applicant_detail)
+        db.upsert(applicant_detail)
+
+    response = {
+        "count": len(resumelist),
+        "applicants": resumelist
+    }
+
+    return response
