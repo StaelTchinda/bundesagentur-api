@@ -25,10 +25,24 @@ class DetailedApplicantsDb:
         applicant_serializable_dict = self._serialize_object_(applicant)
         self.db.insert(applicant_serializable_dict)
 
+    def get(self, query: QueryLike):
+        return self.db.search(query)
+    
+    def get_by_refnr(self, refnr: Text) -> Optional[BewerberDetail]:
+        doc: Optional[Document | List[Document]] = self.db.get(Query().refnr == refnr)
+        if doc is None:
+            return None
+        elif isinstance(doc, list):
+            return BewerberDetail(**doc[0])
+        return BewerberDetail(**doc)
+
     def _serialize_object_(self, applicant: BewerberDetail) -> Dict:
         applicant_json = json.dumps(applicant.__dict__, default=str)
         applicant_serializable_dict = json.loads(applicant_json)
         return applicant_serializable_dict
+    
+    def _unserealize_object_(self, applicant_dict: Dict) -> BewerberDetail:
+        return BewerberDetail(**applicant_dict)
     
     def upsert(self, applicant: BewerberDetail):
         query = Query()
