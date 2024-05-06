@@ -1,19 +1,17 @@
-from re import T
-from typing import Annotated, Callable, Dict, Optional, Text, List
+import json
+from typing import Dict, List, Optional, Text
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from tinydb import Query
 from tinydb.queries import QueryInstance
 import logging
 
-from src.arbeitsagentur.models.db.nosql import SearchedApplicantsDb, DetailedApplicantsDb
-from src.arbeitsagentur.models.response import ApplicantSearchResponse, TimePeriod, Lokation, BewerberDetail, DetailedApplicantSearchResponse
+from src.arbeitsagentur.models.db.nosql import DetailedApplicantsDb, SearchedApplicantsDb
+from src.arbeitsagentur.models.response import ApplicantSearchResponse, BewerberDetail, GenericBewerber, Lokation, TimePeriod
 from src.arbeitsagentur.models.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 from src.arbeitsagentur.models.request import SearchParameters
 from src.arbeitsagentur.service import ApplicantApi
 from src.configs import DEFAULT_LOGGING_CONFIG
-
-import fastapi
 
 router = APIRouter()
 
@@ -115,6 +113,7 @@ def fetch_applicant_resumes(
 
 @router.get("/applicants/local_search", response_class=JSONResponse)
 def local_search(
+    keyword: Text | None = None,
     maxGraduationYear : int | None = None,
     minWorkExperienceYears : int | None = None,
     careerField : Text | None = None,
@@ -124,16 +123,24 @@ def local_search(
     page: int = 1,
     size: int = 25,
 ):
-    candidates = local_filter(maxGraduationYear, minWorkExperienceYears, careerField, workingTime, locationKeyword)
+    candidates = local_filter(keyword, maxGraduationYear, minWorkExperienceYears, careerField, workingTime, locationKeyword)
 
     logger.info(f"Found in total {len(candidates)} candidates")
 
-    candidates = candidates[(page-1)*size:page*size+size]
+    candidates = candidates[(page-1)*size:(page-1)*size+size]
 
-    return candidates
+    response = {
+        "total": len(candidates),
+        "candidateRefnrs": [candidate["refnr"] for candidate in candidates],
+        "candidateLinks": [f"https://www.arbeitsagentur.de/bewerberboerse/bewerberdetail/{candidate["refnr"]}" for candidate in candidates],
+        "candidates": candidates
+    }
+
+    return response
 
 
 def local_filter(
+    keyword: Text | None = None,
     maxGraduationYear : int | None = None,
     minWorkExperienceYears : int | None = None,
     careerField : Text | None = None,
@@ -143,6 +150,22 @@ def local_filter(
     db = SearchedApplicantsDb()
 
     query: Optional[QueryInstance] = None
+
+    if keyword is not None:
+        _applicant = Query()
+        subquery = _applicant.refnr.search(keyword) \
+                    | _applicant.freierTitelStellengesuch.search(keyword) \
+                    | _applicant.berufe.search(keyword) \
+                    | _applicant.letzteTaetigkeit.bezeichnung.search(keyword) \
+                    | _applicant.erfahrung.berufsfeldErfahrung.any(Query().berufsfeld.search(keyword)) \
+                    | _applicant.ausbildungen.any(Query().art.search(keyword)) \
+        
+
+        if query is None:
+            query = subquery
+        else:
+            query &= subquery
+
 
     if maxGraduationYear is not None:
         _applicant = Query()
