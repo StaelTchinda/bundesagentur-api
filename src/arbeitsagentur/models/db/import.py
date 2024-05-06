@@ -12,7 +12,7 @@ from tinydb.queries import QueryLike
 PathLike = Union[Path, Text]
 
 class KnowledgeDb:
-    def __init__(self, db_basepath: PathLike = "data/db/knowledgedb/"):
+    def __init__(self, db_basepath: PathLike = "data/knowledge_base/"):
         self.certificates_db = TinyDB("{}certificates.json".format(db_basepath))
         self.workfields_db = TinyDB("{}workfields.json".format(db_basepath))
         self.location_db = TinyDB("{}location.json".format(db_basepath))
