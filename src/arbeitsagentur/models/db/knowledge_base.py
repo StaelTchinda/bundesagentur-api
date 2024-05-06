@@ -82,7 +82,3 @@ class LocationDb(KnowledgeBaseDb):
 class WorkfieldsDb(KnowledgeBaseDb):
     def __init__(self, db_basepath: PathLike = "data/knowledge_base/workfields.json"):
         super.__init__(db_basepath)
-
-
-
-#certificates = load_certificates("Users\n50030622\Desktop\Project Study SeniorConnect\bundesagentur-api\src\arbeitsagentur\models\db\certificates.json")
