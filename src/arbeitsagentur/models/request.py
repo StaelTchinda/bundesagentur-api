@@ -29,3 +29,6 @@ SEARCH_PARAMETERS_TO_GET_PARAMS: Dict[Text, Text] = {
     "page": "page",
     "size": "size"
 }
+
+class DetailedApplicantSearchRequest(BaseModel):
+    applicantIds : list[str]

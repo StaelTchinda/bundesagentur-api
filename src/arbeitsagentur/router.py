@@ -9,7 +9,7 @@ import logging
 from src.arbeitsagentur.models.db.nosql import DetailedApplicantsDb, SearchedApplicantsDb
 from src.arbeitsagentur.models.response import ApplicantSearchResponse, BewerberDetail, GenericBewerber, Lokation, TimePeriod
 from src.arbeitsagentur.models.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
-from src.arbeitsagentur.models.request import SearchParameters
+from src.arbeitsagentur.models.request import SearchParameters, DetailedApplicantSearchRequest
 from src.arbeitsagentur.service import ApplicantApi
 from src.configs import DEFAULT_LOGGING_CONFIG
 
@@ -239,13 +239,14 @@ def local_filter(
 
 
 
-@router.get("/applicants/fetch_detailed_resumes", response_class=JSONResponse)
-def fetch_applicant_details(applicant_ids: str):
+@router.post("/applicants/fetch_detailed_resumes", response_class=DetailedApplicantSearchResponse)
+def fetch_applicant_details(request: DetailedApplicantSearchRequest):
     #for some reason the input won't display as a list in the doc gui, so we'll just have to go with comma separated list for now
     db = DetailedApplicantsDb()
     
     resumelist : List = []
-    applicant_ids = applicant_ids.split(",")
+    #applicant_ids = applicant_ids.split(",")
+    applicant_ids = request.applicantIds
     for applicant_id in applicant_ids:
         applicant_detail = BewerberDetail(**get_applicant(applicant_id=applicant_id))
         resumelist.append(applicant_detail)
