@@ -239,7 +239,7 @@ def local_filter(
 
 
 
-@router.post("/applicants/fetch_detailed_resumes", response_class=DetailedApplicantSearchResponse)
+@router.post("/applicants/fetch_detailed_resumes", response_model=DetailedApplicantSearchResponse)
 def fetch_applicant_details(request: DetailedApplicantSearchRequest):
     #for some reason the input won't display as a list in the doc gui, so we'll just have to go with comma separated list for now
     db = DetailedApplicantsDb()
