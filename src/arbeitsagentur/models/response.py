@@ -244,22 +244,22 @@ class BewerberUebersicht(GenericBewerber):
 
 
 class BewerberDetail(GenericBewerber):
-    erwartungAnDieStelle:               Optional[Text]                      = None
-    abschluss:                          Optional[Text]                      = None
-    sucheNurSchwerbehinderung:          bool
-    entfernungMaxKriterium:             Text
-    vertragsdauer:                      Text
-    suchtGeringfuegigeBeschaeftigung:   Optional[Text]                      = None
-    lokationen:                         Optional[List[Lokation]]            = None
-    werdegang:                          Optional[List[LebenslaufElement]]   = None
-    bildung:                            Optional[List[LebenslaufElement]]   = None
-    mobilitaet:                         Optional[Mobilitaet]                = None #not sure what elements are possible here
-    sprachkenntnisse:                   Optional[Kenntnisse]                = None
-    kenntnisse:                         Optional[Kenntnisse]                = None
-    ausbildungen:                       Optional[List[Ausbildung]]          = None
-    erfahrung:                          Optional[Erfahrung]                 = None
-    softskills:                         Optional[List[Text]]                = None
-    lizenzen:                           Optional[List[Lizenz]]              = None
+    erwartungAnDieStelle: Optional[Text] = None
+    abschluss: Optional[Text] = None
+    sucheNurSchwerbehinderung: bool
+    entfernungMaxKriterium: Text
+    vertragsdauer: Text
+    suchtGeringfuegigeBeschaeftigung: Optional[Text] = None
+    lokationen: Optional[List[Lokation]] = None
+    werdegang: Optional[List[LebenslaufElement]] = None
+    bildung: Optional[List[LebenslaufElement]] = None
+    mobilitaet: Optional[Mobilitaet] = None #not sure what elements are possible here
+    sprachkenntnisse: Optional[Kenntnisse] = None
+    kenntnisse: Optional[Kenntnisse] = None
+    ausbildungen: Optional[List[Ausbildung]] = None
+    erfahrung: Optional[Erfahrung] = None
+    softskills: Optional[List[Text]] = None
+    lizenzen: Optional[List[Lizenz]] = None
 
 
 class ApplicantSearchResponse(BaseModel):
