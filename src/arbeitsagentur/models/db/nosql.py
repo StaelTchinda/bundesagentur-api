@@ -25,6 +25,14 @@ class DetailedApplicantsDb:
         applicant_serializable_dict = self._serialize_object_(applicant)
         self.db.insert(applicant_serializable_dict)
 
+    def _serialize_object_(self, applicant: BewerberDetail) -> Dict:
+        applicant_json = json.dumps(applicant.__dict__, default=default_json_dumps)
+        applicant_serializable_dict = json.loads(applicant_json)
+        return applicant_serializable_dict
+    
+    def _unserealize_object_(self, applicant_dict: Dict) -> BewerberDetail:
+        return BewerberDetail(**applicant_dict)
+
 
 class SearchedApplicantsDb:
     def __init__(self, db_path: PathLike = "data/db/applicants.json"):
@@ -75,21 +83,13 @@ class SearchedApplicantsDb:
     def __del__(self):
         self.db.close()
 
-    def _serialize_object_(self, applicant: Bewerber) -> Dict:
-        def default_json_dumps(obj: Any):
-            if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
-                return str(obj)
-            elif isinstance(obj, Enum):
-                return obj.value
-            elif hasattr(obj, "__dict__"):
-                return obj.__dict__
-            return str(obj)
+    def _serialize_object_(self, applicant: BewerberUebersicht) -> Dict:
         applicant_json = json.dumps(applicant.__dict__, default=default_json_dumps)
         applicant_serializable_dict = json.loads(applicant_json)
         return applicant_serializable_dict
     
-    def _unserealize_object_(self, applicant_dict: Dict) -> Bewerber:
-        return Bewerber(**applicant_dict)
+    def _unserealize_object_(self, applicant_dict: Dict) -> BewerberUebersicht:
+        return BewerberUebersicht(**applicant_dict)
 
 
 class LocalSearchParameters:
@@ -104,3 +104,13 @@ class LocalSearchParameters:
     disability: Union[Disability, None]
     page: Union[int, None]
     size: Union[int, None]
+
+
+def default_json_dumps(obj: Any):
+    if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
+        return str(obj)
+    elif isinstance(obj, Enum):
+        return obj.value
+    elif hasattr(obj, "__dict__"):
+        return obj.__dict__
+    return str(obj)
