@@ -7,7 +7,7 @@ from tinydb.queries import QueryInstance
 import logging
 
 from src.arbeitsagentur.models.db.nosql import DetailedApplicantsDb, SearchedApplicantsDb
-from src.arbeitsagentur.models.response import ApplicantSearchResponse, BewerberDetail, GenericBewerber, Lokation, TimePeriod
+from src.arbeitsagentur.models.response import ApplicantSearchResponse, BewerberDetail, DetailedApplicantSearchResponse, GenericBewerber, Lokation, TimePeriod
 from src.arbeitsagentur.models.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 from src.arbeitsagentur.models.request import SearchParameters, DetailedApplicantSearchRequest
 from src.arbeitsagentur.service import ApplicantApi
