@@ -1,0 +1,1 @@
+from src.applicants.schemas.arbeitsagentur.schemas import ApplicantSearchResponse

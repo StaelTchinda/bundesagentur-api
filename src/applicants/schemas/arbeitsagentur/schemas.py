@@ -1,13 +1,12 @@
-from enum import Enum
+from typing import List, Optional, Union, Text, Dict
+from datetime import date, datetime
+from pydantic import BaseModel, Field, field_validator, AliasChoices
 import re
-from typing import Any, Dict, List, Optional, Text, Union
-from datetime import datetime, date
-from dataclasses import dataclass, field
 
-from click import Option
-from pydantic import BaseModel, field_validator, Field, AliasChoices
+from pydantic import BaseModel
 
-from src.arbeitsagentur.models.enums import WorkingTime, JobType
+from src.applicants.schemas.arbeitsagentur.enums import JobType, WorkingTime
+
 
 # TODO: better represent optional fields
 
@@ -23,14 +22,14 @@ class TimePeriod(str):
     def _regexp_pattern_(cls) -> str:
         regex = r"P((\d+)Y)?((\d+)M)?((\d+)D)?" # Jonathan
         return regex
-    
+
     def __new__(cls, value: str):
         if not cls.validate(value):
             raise ValueError(f"Invalid time period format: {value}")
         return str.__new__(cls, value)
-    
 
-    @classmethod 
+
+    @classmethod
     def validate(cls, value: str) -> bool:
         """This function validates that the input string is a valid time period in the format PnYnMnD.
 
@@ -42,7 +41,7 @@ class TimePeriod(str):
         """
         reg_exp = cls._regexp_pattern_()
         return re.match(reg_exp, value) is not None
-    
+
 
     def get_time_dict(self) -> Dict[Text, int]:
         """This function returns the time period as a dictionary.
@@ -50,7 +49,7 @@ class TimePeriod(str):
         Returns:
             Dict[Text, int]: A dictionary with the keys 'years', 'months', and 'days'.
         """
-        regex = self._regexp_pattern_() 
+        regex = self._regexp_pattern_()
         search = re.search(regex, self)
         if search is None:
             raise ValueError(f"Invalid time period format: {self}")
@@ -71,7 +70,7 @@ class TimePeriod(str):
             int: The number of years in the time period.
         """
         return self.get_time_dict()['years']
-    
+
     def get_months(self) -> int:
         """This function returns the number of months in the time period.
 
@@ -79,7 +78,7 @@ class TimePeriod(str):
             int: The number of months in the time period.
         """
         return self.get_time_dict()['months']
-    
+
     def get_days(self) -> int:
         """This function returns the number of days in the time period.
 
@@ -105,7 +104,6 @@ class TimePeriod(str):
         return self.get_time() < value.get_time()
 
 
-
 class BerufsfeldErfahrung(BaseModel):
     berufsfeld: Text
     erfahrung: Optional[Text] = None  # This appears to be in an ISO 8601 duration format
@@ -116,6 +114,7 @@ class BerufsfeldErfahrung(BaseModel):
             if not TimePeriod.validate(v):
                 raise ValueError(f"Invalid time period format: {v}")
         return v
+
 
 class Erfahrung(BaseModel):
     berufsfeldErfahrung: Optional[List[BerufsfeldErfahrung]] = None
@@ -128,14 +127,17 @@ class Erfahrung(BaseModel):
                 raise ValueError(f"Invalid time period format: {v}")
         return v
 
+
 class LetzteTaetigkeit(BaseModel):
     jahr: Optional[int] = None# TODO: Add validation for year
     bezeichnung: Text
     aktuell: bool
 
+
 class Ausbildung(BaseModel):
     jahr: int
     art: Text
+
 
 class Lokation(BaseModel):
     ort: Optional[Text] = None
@@ -147,7 +149,7 @@ class Lokation(BaseModel):
     def check_location(self, locationKeyword: Text) -> bool:
         if locationKeyword is None:
             raise ValueError("LocationKeyword is None")
-        
+
         if self.ort is not None and locationKeyword in self.ort:
             return True
         elif self.plz is not None and locationKeyword in str(self.plz):
@@ -187,22 +189,20 @@ class Facetten(BaseModel):
     topKenntnisse: FacettenElement
 
 
-#it would be good to get a full list of attributes these elements 
-#can have and whether they are optional. This is just my best guess so far
 class LebenslaufElement(BaseModel):
     von: Optional[date] = None
     bis: Optional[date] = None
     ort: Optional[Text] = None
     land: Optional[Text] = None
-    berufsbezeichnung: Text
     lebenslaufart: Text
     berufsbezeichnung: Optional[Text] = None
     beschreibung: Optional[Text] = None
     istAbgeschlossen: Optional[Text] = None
-    lebenslaufartenKategorie: Text = None
+    lebenslaufartenKategorie: Optional[Text] = None
     nameArtEinrichtung: Optional[Text] = None
     schulAbschluss: Optional[Text] = None
     schulart: Optional[Text] = None
+
 
 class Kenntnisse(BaseModel):
     Expertenkenntnisse: Optional[List[Text]] = Field(validation_alias=AliasChoices('Expertenkenntnisse', 'Verhandlungssicher'), default=None)
@@ -217,7 +217,7 @@ class Lizenz(BaseModel):
 
 class Mobilitaet(BaseModel):
     reisebereitschaft: Optional[Text] = None
-    fuehrerscheine: List[Text] = None
+    fuehrerscheine: Optional[List[Text]] = None
     fahrzeugVorhanden: Optional[bool] = None
 
 
@@ -227,7 +227,7 @@ class GenericBewerber(BaseModel):
     aktualisierungsdatum: datetime  # ISO 8601 date-time format
     veroeffentlichungsdatum: date  # ISO 8601 date format
     stellenart: JobType
-    arbeitszeitModelle: List[WorkingTime]
+    arbeitszeitModelle: Optional[List[WorkingTime]] = None
     berufe: List[Text]
     erfahrung: Optional[Erfahrung] = None
     ausbildungen: Optional[List[Ausbildung]] = None
@@ -268,8 +268,3 @@ class ApplicantSearchResponse(BaseModel):
     page: int
     size: int
     facetten: Facetten
-
-
-class DetailedApplicantSearchResponse(BaseModel):
-    count: int
-    applicants: List[BewerberDetail]
