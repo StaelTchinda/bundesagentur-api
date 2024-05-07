@@ -2,10 +2,10 @@ from typing import List, Text
 import logging
 
 
-from src.arbeitsagentur.router import local_filter
-from src.arbeitsagentur.models.db.nosql import SearchedApplicantsDb
-from src.arbeitsagentur.models.response import TimePeriod
-from src.arbeitsagentur.models.enums import WorkingTime
+from src.applicants.router.extended import search_applicants
+from src.applicants.schemas.arbeitsagentur.enums import WorkingTime
+from src.applicants.schemas.arbeitsagentur.schemas import TimePeriod
+from src.applicants.service.extended.db import SearchedApplicantsDb
 from src.configs import DEFAULT_LOGGING_CONFIG
 
 
@@ -128,7 +128,10 @@ def test_local_search():
         location_keyword
     )
 
-    candidates = local_filter(
+    
+
+    candidates = search_applicants(
+        None,
         max_graduation_year,
         min_work_experience_years,
         career_field,

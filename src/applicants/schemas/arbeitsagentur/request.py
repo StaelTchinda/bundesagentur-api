@@ -1,6 +1,6 @@
 from typing import Union, Text, Dict
 from pydantic import BaseModel
-from src.arbeitsagentur.models.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
+from src.applicants.schemas.arbeitsagentur.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 
 
 class SearchParameters(BaseModel):
@@ -30,5 +30,3 @@ SEARCH_PARAMETERS_TO_GET_PARAMS: Dict[Text, Text] = {
     "size": "size"
 }
 
-class DetailedApplicantSearchRequest(BaseModel):
-    applicantIds : list[str]

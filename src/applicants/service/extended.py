@@ -7,9 +7,8 @@ from tinydb import TinyDB, Query
 from tinydb.queries import QueryLike
 from tinydb.table import Document
 
-from src.arbeitsagentur.models.enums import *
-from src.arbeitsagentur.models.response import BewerberUebersicht
-from src.arbeitsagentur.models.response import BewerberDetail
+from src.applicants.schemas.arbeitsagentur.enums import *
+from src.applicants.schemas.arbeitsagentur.schemas import BewerberUebersicht, BewerberDetail
 
 
 PathLike = Union[Path, Text]
@@ -71,18 +70,26 @@ class SearchedApplicantsDb:
         elif isinstance(doc, list):
             return BewerberUebersicht(**doc[0])
         return BewerberUebersicht(**doc)
+    
+    def get_by_refnrs(self, refnrs: List[Text]) -> List[BewerberUebersicht]:
+        docs: List[Document] = self.db.search(Query().refnr.test(lambda x: x in refnrs))
+        applicants: List[BewerberUebersicht] = [self._unserealize_object_(doc) for doc in docs]
+        return applicants
 
-    def get(self, query: QueryLike):
-        return self.db.search(query)
+    def get(self, query: QueryLike) -> List[BewerberUebersicht]:
+        docs: List[Document] = self.db.search(query)
+        applicants: List[BewerberUebersicht] = [self._unserealize_object_(doc) for doc in docs]
+        return applicants
 
-    def get_all(self):
-        results = self.db.all()
-        return [self._unserealize_object_(result) for result in results]
+    def get_all(self) -> List[BewerberUebersicht]:
+        docs: List[Document] = self.db.all()
+        applicants: List[BewerberUebersicht] = [self._unserealize_object_(doc) for doc in docs]
+        return applicants
 
-    def update(self, query: QueryLike, data):
+    def update(self, query: QueryLike, data) -> None:
         self.db.update(data, query)
 
-    def upsert(self, applicant: BewerberUebersicht):
+    def upsert(self, applicant: BewerberUebersicht) -> None:
         query = Query()
         if self.db.contains(query.refnr == applicant.refnr):
             serializable_dict = self._serialize_object_(applicant)
@@ -90,16 +97,16 @@ class SearchedApplicantsDb:
         else:
             self.insert(applicant)
 
-    def remove(self, query: QueryLike):
+    def remove(self, query: QueryLike) -> None:
         self.db.remove(query)
 
-    def remove_all(self):
+    def remove_all(self) -> None:
         self.db.purge()
 
-    def close(self):
+    def close(self) -> None:
         self.db.close()
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.db.close()
 
     def _serialize_object_(self, applicant: BewerberUebersicht) -> Dict:
@@ -117,17 +124,3 @@ class SearchedApplicantsDb:
     
     def _unserealize_object_(self, applicant_dict: Dict) -> BewerberUebersicht:
         return BewerberUebersicht(**applicant_dict)
-
-
-class LocalSearchParameters:
-    searchKeyword: Union[Text, None]
-    educationType: Union[EducationType, None]
-    locationKeyword: Union[Text, None]
-    locationRadius: Union[LocationRadius, None]
-    offerType: Union[OfferType, None]
-    workingTime: Union[WorkingTime, None]
-    workExperience: Union[WorkExperience, None]
-    contractType: Union[ContractType, None]
-    disability: Union[Disability, None]
-    page: Union[int, None]
-    size: Union[int, None]
