@@ -1,5 +1,5 @@
-from typing import Dict, List, Optional, Text
-from fastapi import APIRouter, HTTPException
+from typing import Annotated, Dict, List, Optional, Text
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 import logging
 
@@ -83,7 +83,7 @@ def fetch_applicants(
 
 @router.get("/applicants/search", response_model=SearchApplicantsResponse)
 def search_applicants(
-    keyword: Text | None = None,
+    keywords: List[Text] = Query([]),
     maxGraduationYear : int | None = None,
     minWorkExperienceYears : int | None = None,
     careerField : Text | None = None,
@@ -94,7 +94,7 @@ def search_applicants(
     size: int = 25,
 ):
     search_parameters = ExtendedSearchParameters(
-        keyword=keyword,
+        keywords=keywords,
         max_graduation_year=maxGraduationYear,
         min_work_experience_years=minWorkExperienceYears,
         career_field=careerField,

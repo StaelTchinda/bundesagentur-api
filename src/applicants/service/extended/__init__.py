@@ -1,6 +1,6 @@
 
 
-from typing import Optional, Text
+from typing import List, Optional, Text
 
 from pydantic import BaseModel
 from tinydb import Query
@@ -11,7 +11,7 @@ from src.applicants.schemas.arbeitsagentur.enums import WorkingTime
 
 
 class ExtendedSearchParameters(BaseModel):
-  keyword: Optional[Text] = None
+  keywords: Optional[List[Text]] = None
   max_graduation_year: Optional[int] = None
   min_work_experience_years: Optional[int] = None
   career_field: Optional[Text] = None
@@ -22,19 +22,20 @@ class ExtendedSearchParameters(BaseModel):
 def build_search_query(search_parameters: ExtendedSearchParameters) -> Optional[QueryInstance]:
   query: Optional[QueryInstance] = None
 
-  if search_parameters.keyword is not None:
-    _applicant = Query()
-    subquery = _applicant.refnr.search(search_parameters.keyword) \
-                | _applicant.freierTitelStellengesuch.search(search_parameters.keyword) \
-                | _applicant.berufe.search(search_parameters.keyword) \
-                | _applicant.letzteTaetigkeit.bezeichnung.search(search_parameters.keyword) \
-                | _applicant.erfahrung.berufsfeldErfahrung.any(Query().berufsfeld.search(search_parameters.keyword)) \
-                | _applicant.ausbildungen.any(Query().art.search(search_parameters.keyword))
+  if search_parameters.keywords is not None and search_parameters.keywords != []:
+    for keyword in search_parameters.keywords:
+      _applicant = Query()
+      subquery = _applicant.refnr.search(keyword) \
+                  | _applicant.freierTitelStellengesuch.search(keyword) \
+                  | _applicant.berufe.search(keyword) \
+                  | _applicant.letzteTaetigkeit.bezeichnung.search(keyword) \
+                  | _applicant.erfahrung.berufsfeldErfahrung.any(Query().berufsfeld.search(keyword)) \
+                  | _applicant.ausbildungen.any(Query().art.search(keyword))
 
-    if query is None:
-      query = subquery
-    else:
-      query &= subquery
+      if query is None:
+        query = subquery
+      else:
+        query &= subquery
 
   if search_parameters.max_graduation_year is not None:
     _applicant = Query()
