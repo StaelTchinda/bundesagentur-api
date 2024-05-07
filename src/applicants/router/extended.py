@@ -60,7 +60,7 @@ def fetch_applicants(
             size=size,
         )
         search_result_dict: Dict = api.search_applicants(search_parameters)
-        logger.info(f"Fetching resumes from page {page_idx + 1}: {search_result_dict}")
+        logger.info(f"Fetching resumes from page {page_idx + 1} with keys: {search_result_dict.keys()}")
         if "messages" in search_result_dict:
             logger.warning(f"Error while fetching resumes: {search_result_dict['messages']}")
             raise HTTPException(status_code=400, detail=search_result_dict["messages"])
