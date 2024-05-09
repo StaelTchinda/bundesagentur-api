@@ -212,7 +212,7 @@ class Kenntnisse(BaseModel):
 
 class Lizenz(BaseModel):
     bezeichnung: Text
-    gueltigVon: Text
+    gueltigVon: Optional[Text] = None
 
 
 class Mobilitaet(BaseModel):
