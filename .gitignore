@@ -162,3 +162,4 @@ cython_debug/
 .vscode/
 data/db
 logs
+.DS_Store
