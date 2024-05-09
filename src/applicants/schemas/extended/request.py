@@ -1,7 +1,7 @@
-from typing import List, Text
+from typing import List, Text, Optional
 from pydantic import BaseModel
 
-from applicants.schemas.arbeitsagentur.enums import WorkingTime
+from src.applicants.schemas.arbeitsagentur.enums import WorkingTime
 
 
 
