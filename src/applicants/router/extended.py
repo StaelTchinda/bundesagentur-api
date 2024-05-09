@@ -140,6 +140,12 @@ def fetch_applicant_details(request: FetchApplicantsRequest):
     all_applicants_details: List[BewerberDetail] = []
     for applicant_id in applicant_ids:
         applicant_details_dict: Dict = api.get_applicant(applicant_id)
+        if "messages" in applicant_details_dict:
+            logger.warning(f"Error while fetching details for applicant {applicant_id}: {applicant_details_dict['messages']}")
+            raise HTTPException(status_code=400, detail=applicant_details_dict["messages"])
+        elif "refnr" not in applicant_details_dict:
+            logger.warning(f"No details found for applicant {applicant_id}")
+            continue
         applicant_detail: BewerberDetail = BewerberDetail(**applicant_details_dict)
         all_applicants_details.append(applicant_detail)
         db.upsert(applicant_detail)
