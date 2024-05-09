@@ -24,19 +24,21 @@ class DetailedApplicantsDb:
         applicant_serializable_dict = self._serialize_object_(applicant)
         self.db.insert(applicant_serializable_dict)
 
-    def get(self, query: QueryLike):
-        return self.db.search(query)
+    def get(self, query: QueryLike) -> List[BewerberDetail]:
+        docs: List[Document] = self.db.search(query)
+        applicants: List[BewerberDetail] = [self._unserealize_object_(doc) for doc in docs]
+        return applicants
     
     def get_by_refnr(self, refnr: Text) -> Optional[BewerberDetail]:
         doc: Optional[Document | List[Document]] = self.db.get(Query().refnr == refnr)
         if doc is None:
             return None
         elif isinstance(doc, list):
-            return BewerberDetail(**doc[0])
-        return BewerberDetail(**doc)
+            return self._unserealize_object_(doc[0])
+        return self._unserealize_object_(doc)
 
     def _serialize_object_(self, applicant: BewerberDetail) -> Dict:
-        applicant_json = json.dumps(applicant.__dict__, default=str)
+        applicant_json = json.dumps(applicant.__dict__, default=default_json_dumps)
         applicant_serializable_dict = json.loads(applicant_json)
         return applicant_serializable_dict
     
@@ -110,17 +112,19 @@ class SearchedApplicantsDb:
         self.db.close()
 
     def _serialize_object_(self, applicant: BewerberUebersicht) -> Dict:
-        def default_json_dumps(obj: Any):
-            if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
-                return str(obj)
-            elif isinstance(obj, Enum):
-                return obj.value
-            elif hasattr(obj, "__dict__"):
-                return obj.__dict__
-            return str(obj)
         applicant_json = json.dumps(applicant.__dict__, default=default_json_dumps)
         applicant_serializable_dict = json.loads(applicant_json)
         return applicant_serializable_dict
     
     def _unserealize_object_(self, applicant_dict: Dict) -> BewerberUebersicht:
         return BewerberUebersicht(**applicant_dict)
+
+
+def default_json_dumps(obj: Any):
+    if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
+        return str(obj)
+    elif isinstance(obj, Enum):
+        return obj.value
+    elif hasattr(obj, "__dict__"):
+        return obj.__dict__
+    return str(obj)
