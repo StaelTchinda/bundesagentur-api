@@ -1,10 +1,10 @@
 from typing import Optional
 from tinydb import Query
 from tinydb.queries import QueryInstance
-from applicants.schemas.arbeitsagentur.enums import WorkingTime
+from src.applicants.schemas.arbeitsagentur.enums import WorkingTime
 
-from applicants.schemas.arbeitsagentur.schemas import TimePeriod
-from applicants.schemas.extended.request import ExtendedSearchParameters
+from src.applicants.schemas.arbeitsagentur.schemas import TimePeriod
+from src.applicants.schemas.extended.request import ExtendedSearchParameters
 
 
 def build_search_query(search_parameters: ExtendedSearchParameters) -> Optional[QueryInstance]:
