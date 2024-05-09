@@ -3,11 +3,12 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 import logging
 
+from applicants.schemas.extended.request import ExtendedSearchParameters
 from src.applicants.schemas.extended.response import FetchApplicantsResponse, SearchApplicantsResponse
 from src.applicants.service.extended.db import DetailedApplicantsDb, SearchedApplicantsDb
 from src.applicants.schemas.arbeitsagentur.request import SearchParameters
 from src.applicants.schemas.extended.request import FetchApplicantsRequest
-from src.applicants.service.extended import ExtendedSearchParameters, build_search_query
+from applicants.service.extended.query import build_search_query
 from src.applicants.schemas.arbeitsagentur.response import ApplicantSearchResponse
 from src.applicants.schemas.arbeitsagentur.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 from src.applicants.schemas.arbeitsagentur.schemas import BewerberDetail, BewerberUebersicht
