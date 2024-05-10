@@ -22,7 +22,7 @@ def parse_args():
     parser.add_argument("--location_keyword", type=str, help="Location keyword", default=None)
 
     parser.add_argument("--pages_count", type=int, help="Number of pages to fetch", default=1)
-    parser.add_argument("--page_size", type=int, help="Page size", default=25)
+    parser.add_argument("--page_size", type=int, help="Page size", default=100)
 
     parser.add_argument("--skip_existing", action="store_true", help="Skip existing applicants in the DB")
 
