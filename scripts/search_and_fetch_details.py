@@ -1,6 +1,7 @@
 import argparse
 from tkinter import E
 from typing import Dict, List, Text
+from tinydb import Query
 from tqdm import tqdm
 
 from src.applicants.service.extended.db import DetailedApplicantsDb
@@ -55,7 +56,7 @@ def main():
     if args.skip_existing:
         # TODO: create an endpoint to get existing applicants from the local DB based on the refnr
         db = DetailedApplicantsDb()
-        existing_applicant_refnrs: List[Text] = [refnr for refnr in applicant_refnrs if db.get_by_refnr(refnr) is not None]
+        existing_applicant_refnrs: List[Text] = [applicant.refnr for applicant in db.get(Query().refnr.one_of(applicant_refnrs))]
         applicant_refnrs = [refnr for refnr in applicant_refnrs if refnr not in existing_applicant_refnrs]
 
         print(f"Skipping {len(existing_applicant_refnrs)} existing applicants in the DB")
