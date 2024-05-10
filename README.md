@@ -39,7 +39,6 @@ python -m scripts.main --reload
 
 Since one benefit of this project is the ability to work with local data, it is important to easily fetch applicant profiles to store them locally. For this purpose, you can use the script `scripts/search_and_fetch_details.py`. One potential use is
 
-````
+```
 python -m scripts.search_and_fetch_details --max_graduation_year 2000 --location_keyword "München" --pages_count 10 --skip-existing
 ```
-````
