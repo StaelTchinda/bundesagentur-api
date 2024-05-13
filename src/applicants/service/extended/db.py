@@ -53,6 +53,11 @@ class DetailedApplicantsDb:
         else:
             self.insert(applicant)
 
+    def get_all(self) -> List[BewerberDetail]:
+        docs: List[Document] = self.db.all()
+        applicants: List[BewerberDetail] = [self._unserealize_object_(doc) for doc in docs]
+        return applicants
+
 
 class SearchedApplicantsDb:
     def __init__(self, db_path: PathLike = "data/db/applicants.json"):
