@@ -18,3 +18,14 @@ class ExtendedSearchParameters(BaseModel):
   location_keyword: Optional[Text] = None
 
 
+class ExtendedDetailedSearchParameters(BaseModel):
+   job_title : Optional[Text] = None
+   location : Optional[Text] = None
+   min_avg_job_position_years : Optional[int] = None
+   min_work_experience_years : Optional[int] = None
+   max_sabbatical_time_years : Optional[int] = None
+   job_titles : Optional[List[Text]] = None
+   job_descriptions : Optional[List[Text]] = None
+   education_keyword : Optional[Text] = None
+   skills : Optional[List[Text]] = None
+   languages : Optional[List[Text]] = None
