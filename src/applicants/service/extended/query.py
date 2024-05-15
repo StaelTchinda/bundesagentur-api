@@ -1,11 +1,21 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from math import log
+import re
+from typing import Callable, List, Optional, Text
 from tinydb import Query
 from tinydb.queries import QueryInstance
-from src.applicants.schemas.arbeitsagentur.enums import WorkingTime
+import logging
 
+
+from src.applicants.schemas.arbeitsagentur.enums import WorkingTime
 from src.applicants.schemas.arbeitsagentur.schemas import LebenslaufElement, TimePeriod
 from src.applicants.schemas.extended.request import ExtendedSearchParameters, ExtendedDetailedSearchParameters
+from src.configs import DEFAULT_LOGGING_CONFIG
+
+
+
+logging.basicConfig(**DEFAULT_LOGGING_CONFIG)
+logger = logging.getLogger(__name__)
 
 
 def build_search_query(search_parameters: ExtendedSearchParameters) -> Optional[QueryInstance]:
@@ -91,6 +101,7 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
     query : Optional[QueryInstance] = None
 
     if search_parameters.job_title is not None:
+      logger.info(f"Searching for job title: {search_parameters.job_title}")
       _applicant = Query()
       subquery = _applicant.freierTitelStellengesuch.search(search_parameters.job_title)
 
@@ -100,6 +111,7 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
         query &= subquery
 
     if search_parameters.location is not None:
+      logger.info(f"Searching for location: {search_parameters.location}")
       _applicant = Query()
       subquery = _applicant.lokationen.any(Query().ort.search(search_parameters.location))
 
@@ -109,6 +121,7 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
         query &= subquery
 
     if search_parameters.min_avg_job_position_years is not None:
+      logger.info(f"Searching for min_avg_job_position_years: {search_parameters.min_avg_job_position_years}")
       _applicant = Query()
 
       #todo: make this into BerufsfeldErfahung objects
@@ -134,6 +147,7 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
         query &= subquery
 
     if search_parameters.min_work_experience_years is not None:
+      logger.info(f"Searching for min_work_experience_years: {search_parameters.min_work_experience_years}")
       _applicant = Query()
       experience_duration_check = lambda x : TimePeriod(x).get_years() >= search_parameters.min_work_experience_years
 
@@ -147,6 +161,7 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
         query &= subquery
 
     if search_parameters.max_sabbatical_time_years is not None:
+      logger.info(f"Searching for max_sabbatical_time_years: {search_parameters.max_sabbatical_time_years}")
       _applicant = Query()
 
       def max_sabbatical_time_check(werdegang : list[LebenslaufElement]) -> bool:
@@ -177,29 +192,35 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
       else:
         query &= subquery
 
-    if(search_parameters.job_titles):
-      _applicant = Query()
-
-      subquery = _applicant.berufe.exists() \
-                  & _applicant.berufe.any(search_parameters.job_titles)
-      
-      if query is None:
-        query = subquery
-      else:
-        query &= subquery
-
-    if(search_parameters.job_descriptions):
-      _applicant = Query()
-
-      subquery = _applicant.werdegang.exists() \
-                  & _applicant.werdegang.any(Query().berufsbezeichnung.one_of(search_parameters.job_descriptions))
-      
-      if query is None:
-        query = subquery
-      else:
-        query &= subquery
+    if(search_parameters.job_keywords):
+      logger.info(f"Searching for job keywords: {search_parameters.job_keywords}")
+      # Search over "werdegang", "berufe", and "erfahrung"
+      for keyword in search_parameters.job_keywords:
+        _applicant = Query()
+        _job_title = Query()
+        _experience = Query()
+        _career = Query()
+        # The field berufe, and erfahrung do not seem to always match with the field erfahrung.
+        # It seems like the field berufe has pre-defined values. 
+        subquery =  _applicant.berufe.exists() \
+                    & _applicant.berufe.test(lambda berufe: any([re.match(keyword, beruf) for beruf in berufe])) \
+                    | (_applicant.erfahrung.exists() \
+                    & _applicant.erfahrung.berufsfeldErfahrung.exists() \
+                    & _applicant.erfahrung.berufsfeldErfahrung.any(
+                        (_experience.berufsfeld.search(keyword))
+                    )) \
+                    | ( _applicant.werdegang.exists() \
+                    & _applicant.werdegang.any(\
+                      _career.berufsbezeichnung.search(keyword) \
+                      | _career.beschreibung.search(keyword)) )
+        
+        if query is None:
+          query = subquery
+        else:
+          query &= subquery
 
     if(search_parameters.education_keyword is not None):
+      logger.info(f"Searching for education keyword: {search_parameters.education_keyword}")
       _applicant = Query()
 
       subquery = _applicant.bildung.exists() \
@@ -219,20 +240,24 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
         query &= subquery
 
     if(search_parameters.skills):
+      logger.info(f"Searching for skills: {search_parameters.skills}")
       #todo: does skills mean kenntnisse or softskills? Search both for now
       _applicant = Query()
 
-      subquery = _applicant.kenntnisse.Expertenkenntnisse.any(search_parameters.skills) \
-                  | _applicant.kenntnisse.ErweiterteKenntnisse.any(search_parameters.skills) \
-                  | _applicant.kenntnisse.Grundkenntnisse.any(search_parameters.skills) \
-                  | _applicant.softskills.any(search_parameters.skills)
-      
-      if query is None:
-        query = subquery
-      else:
-        query &= subquery
+      for skill_keyword in search_parameters.skills:
+        skill_test = lambda skills: skills is not None and any([re.match(skill_keyword, skill) for skill in skills])
+        subquery = _applicant.kenntnisse.Expertenkenntnisse.test(skill_test) \
+                    | _applicant.kenntnisse.ErweiterteKenntnisse.test(skill_test) \
+                    | _applicant.kenntnisse.Grundkenntnisse.test(skill_test) \
+                    | _applicant.softskills.test(skill_test)
+        
+        if query is None:
+          query = subquery
+        else:
+          query &= subquery
 
     if(search_parameters.languages):
+      logger.info(f"Searching for languages: {search_parameters.languages}")
       _applicant = Query()
 
       subquery =  _applicant.sprachkenntnisse.Expertenkenntnisse.any(search_parameters.languages) \
@@ -244,5 +269,6 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
       else:
         query &= subquery
 
+    logger.info(f"Query: {query}")
 
     return query

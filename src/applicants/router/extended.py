@@ -160,19 +160,17 @@ def fetch_applicant_details(request: FetchApplicantsRequest):
 
 @router.post("/applicants/search/details", response_class=JSONResponse)
 def search_applicant_details(
-    jobTitle : Text = None,
-    location : Text = None,
-    minAvgJobPositionYears : int = None,
-    minWorkExperienceYears : int = None,
-    maxSabbaticalTimeYears : int = None,
-    jobTitles : List[Text] = List[Text],
-    jobDescriptions : List[Text] = None,
-    educationKeyword : Text = None,
-    skills : List[Text] = None,
-    languages : List[Text] = None,
-
-    page : int = 1,
-    size : int = 25,
+    jobTitle: Optional[Text] = None,
+    location: Optional[Text] = None,
+    minAvgJobPositionYears: Optional[int] = None,
+    minWorkExperienceYears: Optional[int] = None,
+    maxSabbaticalTimeYears: Optional[int] = None,
+    jobKeywords: List[Text] = Query([]),
+    educationKeyword: Optional[Text] = None,
+    skills: List[Text] = Query([]),
+    languages: List[Text] = Query([]),
+    page: int = 1,
+    size: int = 25,
 ):
     search_parameters = ExtendedDetailedSearchParameters(
         job_title=jobTitle,
@@ -180,8 +178,7 @@ def search_applicant_details(
         min_avg_job_position_years=minAvgJobPositionYears,
         min_work_experience_years=minWorkExperienceYears,
         max_sabbatical_time_years=maxSabbaticalTimeYears,
-        job_titles=jobTitles,
-        job_descriptions=jobDescriptions,
+        job_keywords=jobKeywords,
         education_keyword=educationKeyword,
         skills=skills,
         languages=languages
