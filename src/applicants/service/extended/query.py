@@ -224,15 +224,17 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
       _applicant = Query()
 
       subquery = _applicant.bildung.exists() \
-                  & _applicant.bildung.any(Query().ort.search(search_parameters.education_keyword)) \
-                  & _applicant.bildung.any(Query().land.search(search_parameters.education_keyword)) \
-                  & _applicant.bildung.any(Query().lebenslaufart.search(search_parameters.education_keyword)) \
-                  & _applicant.bildung.any(Query().berufsbezeichnung.search(search_parameters.education_keyword)) \
-                  & _applicant.bildung.any(Query().beschreibung.search(search_parameters.education_keyword)) \
-                  & _applicant.bildung.any(Query().lebenslaufartenKategorie.search(search_parameters.education_keyword)) \
-                  & _applicant.bildung.any(Query().nameArtEinrichtung.search(search_parameters.education_keyword)) \
-                  & _applicant.bildung.any(Query().schulAbschluss.search(search_parameters.education_keyword)) \
-                  & _applicant.bildung.any(Query().schulart.search(search_parameters.education_keyword))
+                  & ( \
+                    _applicant.bildung.any(Query().ort.search(search_parameters.education_keyword)) \
+                  | _applicant.bildung.any(Query().land.search(search_parameters.education_keyword)) \
+                  | _applicant.bildung.any(Query().lebenslaufart.search(search_parameters.education_keyword)) \
+                  | _applicant.bildung.any(Query().berufsbezeichnung.search(search_parameters.education_keyword)) \
+                  | _applicant.bildung.any(Query().beschreibung.search(search_parameters.education_keyword)) \
+                  | _applicant.bildung.any(Query().lebenslaufartenKategorie.search(search_parameters.education_keyword)) \
+                  | _applicant.bildung.any(Query().nameArtEinrichtung.search(search_parameters.education_keyword)) \
+                  | _applicant.bildung.any(Query().schulAbschluss.search(search_parameters.education_keyword)) \
+                  | _applicant.bildung.any(Query().schulart.search(search_parameters.education_keyword)) \
+                  )
       
       if query is None:
         query = subquery
