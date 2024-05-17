@@ -256,8 +256,6 @@ class BewerberDetail(GenericBewerber):
     mobilitaet: Optional[Mobilitaet] = None #not sure what elements are possible here
     sprachkenntnisse: Optional[Kenntnisse] = None
     kenntnisse: Optional[Kenntnisse] = None
-    ausbildungen: Optional[List[Ausbildung]] = None
-    erfahrung: Optional[Erfahrung] = None
     softskills: Optional[List[Text]] = None
     lizenzen: Optional[List[Lizenz]] = None
 
