@@ -3,12 +3,12 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 import logging
 
-from src.applicants.schemas.extended.request import ExtendedSearchParameters
+from src.applicants.schemas.extended.request import ExtendedSearchParameters, ExtendedDetailedSearchParameters
 from src.applicants.schemas.extended.response import FetchApplicantsResponse, SearchApplicantsResponse
 from src.applicants.service.extended.db import DetailedApplicantsDb, SearchedApplicantsDb
 from src.applicants.schemas.arbeitsagentur.request import SearchParameters
 from src.applicants.schemas.extended.request import FetchApplicantsRequest
-from src.applicants.service.extended.query import build_search_query
+from src.applicants.service.extended.query import build_search_query, build_detailed_search_query
 from src.applicants.schemas.arbeitsagentur.response import ApplicantSearchResponse
 from src.applicants.schemas.arbeitsagentur.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 from src.applicants.schemas.arbeitsagentur.schemas import BewerberDetail, BewerberUebersicht
@@ -158,6 +158,53 @@ def fetch_applicant_details(request: FetchApplicantsRequest):
     return response
 
 
-@router.get("/applicants/search/details", response_class=JSONResponse)
-def search_applicant_details():
-    pass
+@router.post("/applicants/search/details", response_class=JSONResponse)
+def search_applicant_details(
+    jobTitle: Optional[Text] = None,
+    location: Optional[Text] = None,
+    minAvgJobPositionYears: Optional[int] = None,
+    minWorkExperienceYears: Optional[int] = None,
+    maxSabbaticalTimeYears: Optional[int] = None,
+    jobKeywords: List[Text] = Query([]),
+    educationKeyword: Optional[Text] = None,
+    skills: List[Text] = Query([]),
+    languages: List[Text] = Query([]),
+    page: int = 1,
+    size: int = 25,
+):
+    search_parameters = ExtendedDetailedSearchParameters(
+        job_title=jobTitle,
+        location=location,
+        min_avg_job_position_years=minAvgJobPositionYears,
+        min_work_experience_years=minWorkExperienceYears,
+        max_sabbatical_time_years=maxSabbaticalTimeYears,
+        job_keywords=jobKeywords,
+        education_keyword=educationKeyword,
+        skills=skills,
+        languages=languages
+    )
+
+    query = build_detailed_search_query(search_parameters)
+    logger.info(f"Query: {query}")
+
+    db = DetailedApplicantsDb()
+
+    if query is not None:
+        applicants = db.get(query)
+    else:
+        applicants = db.get_all()
+
+    total_count : int = len(applicants)
+    logger.info(f"Found in total {total_count} applicants")
+
+    applicants = applicants[(page-1)*size:(page-1)*size+size]
+
+    response = {
+        "maxCount": total_count,
+        "count": len(applicants),
+        "applicantRefnrs": [candidate.refnr for candidate in applicants],
+        "applicantLinks": [f"https://www.arbeitsagentur.de/bewerberboerse/bewerberdetail/{candidate.refnr}" for candidate in applicants],
+        "applicants": applicants
+    }
+    
+    return response
