@@ -52,12 +52,12 @@ class ExtendedSearchParameters(BaseModel):
 
 
 class ExtendedDetailedSearchParameters(BaseModel):
-    job_title : Optional[Text] = None
-    location : Optional[Text] = None
-    min_avg_job_position_years : Optional[int] = None
-    min_work_experience_years : Optional[int] = None
-    max_sabbatical_time_years : Optional[int] = None
-    job_keywords : Optional[List[Text]] = None
-    education_keyword : Optional[Text] = None
-    skills : Optional[List[Text]] = None
-    languages : Optional[List[Text]] = None
+   job_title : Optional[Text] = None
+   location : Optional[Text] = None
+   min_avg_job_position_years : Optional[int] = None
+   min_work_experience_years : Optional[int] = None
+   max_sabbatical_time_years : Optional[int] = None
+   job_keywords : Optional[List[Text]] = None
+   education_keyword : Optional[Text] = None
+   skills : Optional[List[Text]] = None
+   languages : Optional[List[Text]] = None

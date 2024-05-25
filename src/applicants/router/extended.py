@@ -134,13 +134,13 @@ def fetch_applicant_details(request: FetchApplicantsDetailsRequest):
 
 @router.post("/applicants/search/details", response_class=JSONResponse)
 def search_applicant_details(
-    jobTitle: Text = Query(None),
-    location: Text = Query(None),
-    minAvgJobPositionYears: int = Query(None),
-    minWorkExperienceYears: int = Query(None),
-    maxSabbaticalTimeYears: int = Query(None),
+    jobTitle: Optional[Text] = None,
+    location: Optional[Text] = None,
+    minAvgJobPositionYears: Optional[int] = None,
+    minWorkExperienceYears: Optional[int] = None,
+    maxSabbaticalTimeYears: Optional[int] = None,
     jobKeywords: List[Text] = Query([]),
-    educationKeyword: Text = Query(None),
+    educationKeyword: Optional[Text] = None,
     skills: List[Text] = Query([]),
     languages: List[Text] = Query([]),
     page: int = 1,
