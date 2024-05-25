@@ -7,7 +7,7 @@ from tqdm import tqdm
 from src.applicants.service.extended.db import DetailedApplicantsDb
 from src.applicants.schemas.arbeitsagentur.enums import WorkingTime
 from src.applicants.router.extended import fetch_applicant_details, search_applicants
-from src.applicants.schemas.extended.request import FetchApplicantsRequest
+from src.applicants.schemas.extended.request import FetchApplicantsDetailsRequest
 from src.applicants.schemas.extended.response import FetchDetailedApplicantsResponse, SearchApplicantsResponse
 
 
@@ -68,7 +68,7 @@ def main():
     errors: List[Exception] = []
     for applicant_refnr in fetch_pbar:
         try:
-            fetch_response_dict: Dict = fetch_applicant_details(FetchApplicantsRequest(applicantIds=[applicant_refnr]))
+            fetch_response_dict: Dict = fetch_applicant_details(FetchApplicantsDetailsRequest(applicantIds=[applicant_refnr]))
         except Exception as e:
             fetch_pbar_postfix["refnr"] = applicant_refnr
             fetch_pbar_postfix["failed_count"] += 1

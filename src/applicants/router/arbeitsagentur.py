@@ -1,9 +1,8 @@
-from typing import Dict, Text
-from fastapi import APIRouter
+from typing import Annotated, Dict, Text
+from fastapi import APIRouter, Depends
 import logging
 
 from src.applicants.schemas.arbeitsagentur.response import ApplicantSearchResponse
-from src.applicants.schemas.arbeitsagentur.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 from src.applicants.schemas.arbeitsagentur.schemas import BewerberDetail
 from src.applicants.schemas.arbeitsagentur.request import SearchParameters
 from src.applicants.service.arbeitsagentur import ApplicantApi
@@ -16,32 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("/applicants/arbeitsagentur/search", response_model=ApplicantSearchResponse)
-def search_applicants(
-    searchKeyword: Text | None = None,
-    educationType: EducationType = EducationType.UNDEFINED,
-    locationKeyword: Text | None = None,
-    locationRadius: LocationRadius = LocationRadius.ZERO,
-    offerType: OfferType = OfferType.WORKER,
-    workingTime: WorkingTime = WorkingTime.UNDEFINED,
-    workExperience: WorkExperience = WorkExperience.WITH_EXPERIENCE,
-    contractType: ContractType = ContractType.UNDEFINED,
-    disability: Disability = Disability.UNDEFINED,
-    page: int = 1,
-    size: int = 25,
-):
-    search_parameters = SearchParameters(
-        searchKeyword=searchKeyword,
-        educationType=educationType,
-        locationKeyword=locationKeyword,
-        locationRadius=locationRadius,
-        offerType=offerType,
-        workingTime=workingTime,
-        workExperience=workExperience,
-        contractType=contractType,
-        disability=disability,
-        page=page,
-        size=size,
-    )
+def search_applicants(props: Annotated[Dict, Depends(SearchParameters)]):
+    search_parameters = SearchParameters(**props.__dict__)
     api = ApplicantApi()
     api.init()
     search_result_dict: Dict = api.search_applicants(search_parameters)
