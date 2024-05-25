@@ -72,6 +72,15 @@ class OfferType(ParamEnum):
     UNDEFINED = "", None
 
 
+class InputWorkingTime(ParamEnum):
+    FULL_TIME = "Vollzeit", "vz"
+    PART_TIME = "Teilzeit", "tz"
+    SHIFT_NIGHT_WEEKEND = "Schicht,Nacht,Wochenende", "snw"
+    HOME_TELEWORK = "Heim-/Telearbeit", "ho"
+    MINI_JOB = "Minijob", "mj"
+    UNDEFINED = "", None
+
+
 class WorkingTime(ParamEnum):
     FULL_TIME = "Vollzeit", "VOLLZEIT"
     PART_TIME = "Teilzeit", "TEILZEIT"

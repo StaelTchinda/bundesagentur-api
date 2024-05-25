@@ -1,13 +1,13 @@
 from typing import Annotated, Dict, List, Optional, Text
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 import logging
 
-from src.applicants.schemas.extended.request import ExtendedSearchParameters, ExtendedDetailedSearchParameters
+from src.applicants.schemas.extended.request import ExtendedDetailedSearchParameters, ExtendedSearchParameters, FetchParameters
 from src.applicants.schemas.extended.response import FetchApplicantsResponse, SearchApplicantsResponse
 from src.applicants.service.extended.db import DetailedApplicantsDb, SearchedApplicantsDb
 from src.applicants.schemas.arbeitsagentur.request import SearchParameters
-from src.applicants.schemas.extended.request import FetchApplicantsRequest
+from src.applicants.schemas.extended.request import FetchApplicantsDetailsRequest
 from src.applicants.service.extended.query import build_search_query, build_detailed_search_query
 from src.applicants.schemas.arbeitsagentur.response import ApplicantSearchResponse
 from src.applicants.schemas.arbeitsagentur.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
@@ -27,39 +27,13 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("/applicants/fetch", response_model=FetchApplicantsResponse)
-def fetch_applicants(
-    searchKeyword: Text | None = None,
-    educationType: EducationType = EducationType.UNDEFINED,
-    locationKeyword: Text | None = None,
-    locationRadius: LocationRadius = LocationRadius.ZERO,
-    offerType: OfferType = OfferType.WORKER,
-    workingTime: WorkingTime = WorkingTime.UNDEFINED,
-    workExperience: WorkExperience = WorkExperience.WITH_EXPERIENCE,
-    contractType: ContractType = ContractType.UNDEFINED,
-    disability: Disability = Disability.UNDEFINED,
-    pages_count: int = 1,
-    pages_start: Optional[int] = None,
-    size: int = 25,
-):
+def fetch_applicants(params: Annotated[Dict, Depends(FetchParameters)]):
     api = ApplicantApi()
     api.init()
     db = SearchedApplicantsDb()
     searched_applicants_refnrs = []
-    start = pages_start or 0
-    for page_idx in range(start, pages_count):
-        search_parameters = SearchParameters(
-            searchKeyword=searchKeyword,
-            educationType=educationType,
-            locationKeyword=locationKeyword,
-            locationRadius=locationRadius,
-            offerType=offerType,
-            workingTime=workingTime,
-            workExperience=workExperience,
-            contractType=contractType,
-            disability=disability,
-            page=page_idx + 1,
-            size=size,
-        )
+    extended_search_params: FetchParameters = FetchParameters(**params.__dict__)
+    for (page_idx, search_parameters) in enumerate(extended_search_params.get_original_search_params()):
         search_result_dict: Dict = api.search_applicants(search_parameters)
         logger.info(f"Fetching resumes from page {page_idx + 1} with keys: {search_result_dict.keys()}")
         if "messages" in search_result_dict:
@@ -85,11 +59,11 @@ def fetch_applicants(
 @router.get("/applicants/search", response_model=SearchApplicantsResponse)
 def search_applicants(
     keywords: List[Text] = Query([]),
-    maxGraduationYear : int | None = None,
-    minWorkExperienceYears : int | None = None,
-    careerField : Text | None = None,
+    maxGraduationYear: int = Query(None),
+    minWorkExperienceYears: int = Query(None),
+    careerField: Text = Query(None),
     workingTime: WorkingTime = WorkingTime.UNDEFINED,
-    locationKeyword: Text | None = None,
+    locationKeyword: Text = Query(None),
 
     page: int = 1,
     size: int = 25,
@@ -130,7 +104,7 @@ def search_applicants(
 
 
 @router.post("/applicants/fetch/details", response_model=FetchDetailedApplicantsResponse)
-def fetch_applicant_details(request: FetchApplicantsRequest):
+def fetch_applicant_details(request: FetchApplicantsDetailsRequest):
     applicant_ids: List[Text] = request.applicantIds
 
     db = DetailedApplicantsDb()
@@ -160,13 +134,13 @@ def fetch_applicant_details(request: FetchApplicantsRequest):
 
 @router.post("/applicants/search/details", response_class=JSONResponse)
 def search_applicant_details(
-    jobTitle: Optional[Text] = None,
-    location: Optional[Text] = None,
-    minAvgJobPositionYears: Optional[int] = None,
-    minWorkExperienceYears: Optional[int] = None,
-    maxSabbaticalTimeYears: Optional[int] = None,
+    jobTitle: Text = Query(None),
+    location: Text = Query(None),
+    minAvgJobPositionYears: int = Query(None),
+    minWorkExperienceYears: int = Query(None),
+    maxSabbaticalTimeYears: int = Query(None),
     jobKeywords: List[Text] = Query([]),
-    educationKeyword: Optional[Text] = None,
+    educationKeyword: Text = Query(None),
     skills: List[Text] = Query([]),
     languages: List[Text] = Query([]),
     page: int = 1,
