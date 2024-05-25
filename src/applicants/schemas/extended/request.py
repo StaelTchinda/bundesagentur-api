@@ -5,7 +5,7 @@ from src.applicants.schemas.arbeitsagentur.enums import WorkingTime
 
 
 
-class FetchApplicantsRequest(BaseModel):
+class FetchApplicantsDetailsRequest(BaseModel):
     applicantIds : List[Text]
 
 
