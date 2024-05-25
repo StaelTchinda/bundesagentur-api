@@ -5,3 +5,6 @@ uvicorn
 tqdm
 
 tinydb
+
+unittest
+parameterized
