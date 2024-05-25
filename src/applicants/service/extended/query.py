@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from math import log
 import re
-from typing import Callable, List, Optional, Text
+from typing import Callable, List, Optional, Text, Union
 from tinydb import Query
 from tinydb.queries import QueryInstance
 import logging
@@ -17,6 +17,12 @@ from src.configs import DEFAULT_LOGGING_CONFIG
 logging.basicConfig(**DEFAULT_LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
 
+def search_re_keyword(field: Union[Query, str], keyword: Text) -> QueryInstance:
+  if isinstance(field, str):
+    return Query().__getattr__(field).search(f".*{keyword}.*", re.IGNORECASE)
+  else:
+    return field.search(f".*{keyword}.*", re.IGNORECASE)
+
 
 def build_search_query(search_parameters: ExtendedSearchParameters) -> Optional[QueryInstance]:
   query: Optional[QueryInstance] = None
@@ -24,12 +30,12 @@ def build_search_query(search_parameters: ExtendedSearchParameters) -> Optional[
   if search_parameters.keywords is not None and search_parameters.keywords != []:
     for keyword in search_parameters.keywords:
       _applicant = Query()
-      subquery = _applicant.refnr.search(keyword) \
-                  | _applicant.freierTitelStellengesuch.search(keyword) \
-                  | _applicant.berufe.search(keyword) \
-                  | _applicant.letzteTaetigkeit.bezeichnung.search(keyword) \
-                  | _applicant.erfahrung.berufsfeldErfahrung.any(Query().berufsfeld.search(keyword)) \
-                  | _applicant.ausbildungen.any(Query().art.search(keyword))
+      subquery = search_re_keyword(_applicant.refnr, keyword) \
+                  | search_re_keyword(_applicant.freierTitelStellengesuch, keyword) \
+                  | search_re_keyword(_applicant.berufe, keyword) \
+                  | search_re_keyword(_applicant.letzteTaetigkeit.bezeichnung, keyword) \
+                  | _applicant.erfahrung.berufsfeldErfahrung.any(search_re_keyword(Query().berufsfeld, keyword)) \
+                  | _applicant.ausbildungen.any(search_re_keyword(Query().art, keyword))
 
       if query is None:
         query = subquery
@@ -68,7 +74,7 @@ def build_search_query(search_parameters: ExtendedSearchParameters) -> Optional[
     subquery = _applicant.erfahrung.exists() \
                 & _applicant.erfahrung.berufsfeldErfahrung.exists() \
                 & _applicant.erfahrung.berufsfeldErfahrung.any(
-                    (_experience.berufsfeld.search(search_parameters.career_field))
+                    (search_re_keyword(_experience.berufsfeld, search_parameters.career_field))
                 )
 
     if query is None:
