@@ -1,4 +1,4 @@
-from typing import List, Text
+from typing import List, Optional, Text
 
 from pydantic import BaseModel
 
@@ -21,3 +21,11 @@ class SearchApplicantsResponse(BaseModel):
     applicantRefnrs: List[Text]
     applicantLinks: List[Text]
     applicants: List[BewerberUebersicht]
+
+
+class SearchCriteriaSuggestion(BaseModel):
+    location: Optional[Text] = None
+    jobTitles: List[Text]
+    jobDescriptions: List[Text]
+    skills: List[Text]
+    languages: List[Text]

@@ -280,3 +280,11 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
     logger.info(f"Query: {query}")
 
     return query
+
+
+
+def build_knowledge_search_query(job_description: Text) -> Callable[[Text], bool]:
+    """
+    Build a query to search for knowledge in the knowledge base.
+    """
+    return lambda knowledge: str(knowledge).lower() in job_description.lower()

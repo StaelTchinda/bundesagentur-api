@@ -3,12 +3,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 import logging
 
+from src.applicants.service.knowledge_base import JobsDb, LanguagesDb, LocationDb, SkillsDb, WorkfieldsDb
 from src.applicants.schemas.extended.request import ExtendedDetailedSearchParameters, ExtendedSearchParameters, FetchParameters
-from src.applicants.schemas.extended.response import FetchApplicantsResponse, SearchApplicantsResponse
+from src.applicants.schemas.extended.response import FetchApplicantsResponse, SearchApplicantsResponse, SearchCriteriaSuggestion
 from src.applicants.service.extended.db import DetailedApplicantsDb, SearchedApplicantsDb
 from src.applicants.schemas.arbeitsagentur.request import SearchParameters
 from src.applicants.schemas.extended.request import FetchApplicantsDetailsRequest
-from src.applicants.service.extended.query import build_search_query, build_detailed_search_query
+from src.applicants.service.extended.query import build_knowledge_search_query, build_search_query, build_detailed_search_query
 from src.applicants.schemas.arbeitsagentur.response import ApplicantSearchResponse
 from src.applicants.schemas.arbeitsagentur.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 from src.applicants.schemas.arbeitsagentur.schemas import BewerberDetail, BewerberUebersicht
@@ -182,3 +183,35 @@ def search_applicant_details(
     }
     
     return response
+
+
+@router.post("/applicants/suggest_criteria", response_model=SearchCriteriaSuggestion)
+def suggest_criteria(
+    job_description: Text = Query()
+):
+    query = build_knowledge_search_query(job_description)
+    logger.info(f"Query: {query}")
+
+    location_db: LocationDb = LocationDb()
+    location_results = location_db.get(query)
+
+    jobs_db = JobsDb()
+    job_results = jobs_db.get(query)
+
+    skills_db = SkillsDb()
+    skills_results = skills_db.get(query)
+
+    languages_db = LanguagesDb()
+    languages_results = languages_db.get(query)
+
+    work_fields_db = WorkfieldsDb()
+    work_fields_results = work_fields_db.get(query)
+
+    return {
+        "location": location_results[0] if len(location_results)>0 else None,
+        "jobTitles": job_results,
+        "jobDescriptions": work_fields_results,
+        "skills": skills_results,
+        "languages": languages_results
+    }
+    
