@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 import logging
 
-from src.applicants.service.knowledge_base import JobsDb, LanguagesDb, LocationDb, SkillsDb, WorkfieldsDb
+from src.applicants.service.knowledge_base import CompetencesDb, JobsDb, LanguagesDb, LicencesDb, LocationDb, SkillsDb, WorkfieldsDb
 from src.applicants.schemas.extended.request import ExtendedDetailedSearchParameters, ExtendedSearchParameters, FetchParameters
 from src.applicants.schemas.extended.response import FetchApplicantsResponse, SearchApplicantsResponse, SearchCriteriaSuggestion
 from src.applicants.service.extended.db import DetailedApplicantsDb, SearchedApplicantsDb
@@ -192,6 +192,9 @@ def suggest_criteria(
     query = build_knowledge_search_query(job_description)
     logger.info(f"Query: {query}")
 
+    competences_db = CompetencesDb()
+    competences_results = competences_db.get(query)
+
     location_db: LocationDb = LocationDb()
     location_results = location_db.get(query)
 
@@ -201,6 +204,9 @@ def suggest_criteria(
     skills_db = SkillsDb()
     skills_results = skills_db.get(query)
 
+    licences_db = LicencesDb()
+    licences_results = licences_db.get(query)
+
     languages_db = LanguagesDb()
     languages_results = languages_db.get(query)
 
@@ -208,10 +214,12 @@ def suggest_criteria(
     work_fields_results = work_fields_db.get(query)
 
     return {
-        "location": location_results[0] if len(location_results)>0 else None,
+        "locations": location_results,
         "jobTitles": job_results,
         "jobDescriptions": work_fields_results,
+        "competences": competences_results,
         "skills": skills_results,
+        "licences": licences_results,
         "languages": languages_results
     }
     

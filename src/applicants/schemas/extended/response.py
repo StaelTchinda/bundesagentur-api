@@ -24,7 +24,7 @@ class SearchApplicantsResponse(BaseModel):
 
 
 class SearchCriteriaSuggestion(BaseModel):
-    location: Optional[Text] = None
+    locations: List[Text]
     jobTitles: List[Text]
     jobDescriptions: List[Text]
     skills: List[Text]
