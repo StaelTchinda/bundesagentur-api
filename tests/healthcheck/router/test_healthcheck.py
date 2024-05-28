@@ -11,12 +11,7 @@ sys.path.append(str(PROJECT_PATH))
 
 print("PROJECT_PATH", PROJECT_PATH)
 
-
 from src.start import app
-
-
-SEARCH_KEYWORDS: List[Text] = ["Ingenieur", "Manager", "Softwareentwickler", "Krankenschwester", "Lehrer", "Verkäufer"]
-LOCATIONS: List[Text] = ["München", "Heilbronn", "Berlin", "Hamburg", "Köln", "Frankfurt am Main"]
 
 class TestHealthCheck(unittest.TestCase):
     def __init__(self, *args, **kwargs):
