@@ -57,7 +57,9 @@ def build_search_query(search_parameters: ExtendedSearchParameters) -> Optional[
 
   if search_parameters.min_work_experience_years is not None:
     _applicant = Query()
-    experience_duration_check= lambda x: TimePeriod(x).get_years() >= search_parameters.min_work_experience_years
+    experience_duration_check= lambda x: search_parameters.min_work_experience_years is not None \
+                                      and x is not None \
+                                      and search_parameters.min_work_experience_years <= TimePeriod(x).get_years()
 
     subquery = _applicant.erfahrung.exists() \
                 & _applicant.erfahrung.gesamterfahrung.exists() \
@@ -91,14 +93,16 @@ def build_search_query(search_parameters: ExtendedSearchParameters) -> Optional[
     else:
       query &= subquery
 
-    if search_parameters.location_keyword is not None:
-      _applicant = Query()
-      subquery = _applicant.lokation.any(Query().ort.search(search_parameters.location_keyword))
+  if search_parameters.location_keyword is not None:
+    _applicant = Query()
+    subquery = _applicant.lokation.exists() \
+                & _applicant.lokation.ort.exists() \
+                & search_re_keyword(_applicant.lokation.ort, search_parameters.location_keyword)
 
-      if query is None:
-        query = subquery
-      else:
-        query &= subquery
+    if query is None:
+      query = subquery
+    else:
+      query &= subquery
 
   return query
 
@@ -109,7 +113,7 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
     if search_parameters.job_title is not None:
       logger.info(f"Searching for job title: {search_parameters.job_title}")
       _applicant = Query()
-      subquery = _applicant.freierTitelStellengesuch.search(search_parameters.job_title)
+      subquery = search_re_keyword(_applicant.freierTitelStellengesuch, search_parameters.job_title)
 
       if query is None:
         query = subquery
@@ -119,7 +123,7 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
     if search_parameters.location is not None:
       logger.info(f"Searching for location: {search_parameters.location}")
       _applicant = Query()
-      subquery = _applicant.lokationen.any(Query().ort.search(search_parameters.location))
+      subquery = _applicant.lokationen.any(search_re_keyword(Query().ort, search_parameters.location))
 
       if query is None:
         query = subquery
@@ -209,16 +213,16 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
         # The field berufe, and erfahrung do not seem to always match with the field erfahrung.
         # It seems like the field berufe has pre-defined values. 
         subquery =  _applicant.berufe.exists() \
-                    & _applicant.berufe.test(lambda berufe: any([re.match(keyword, beruf) for beruf in berufe])) \
+                    & _applicant.berufe.test(lambda berufe: any([search_re_keyword(beruf, keyword) for beruf in berufe])) \
                     | (_applicant.erfahrung.exists() \
                     & _applicant.erfahrung.berufsfeldErfahrung.exists() \
                     & _applicant.erfahrung.berufsfeldErfahrung.any(
-                        (_experience.berufsfeld.search(keyword))
+                        (search_re_keyword(_experience.berufsfeld, keyword))
                     )) \
                     | ( _applicant.werdegang.exists() \
                     & _applicant.werdegang.any(\
-                      _career.berufsbezeichnung.search(keyword) \
-                      | _career.beschreibung.search(keyword)) )
+                      search_re_keyword(_career.berufsbezeichnung, keyword) \
+                      | search_re_keyword(_career.beschreibung, keyword)) )
         
         if query is None:
           query = subquery
@@ -230,17 +234,17 @@ def build_detailed_search_query(search_parameters : ExtendedDetailedSearchParame
       _applicant = Query()
 
       subquery = _applicant.bildung.exists() \
-                  & ( \
-                    _applicant.bildung.any(Query().ort.search(search_parameters.education_keyword)) \
-                  | _applicant.bildung.any(Query().land.search(search_parameters.education_keyword)) \
-                  | _applicant.bildung.any(Query().lebenslaufart.search(search_parameters.education_keyword)) \
-                  | _applicant.bildung.any(Query().berufsbezeichnung.search(search_parameters.education_keyword)) \
-                  | _applicant.bildung.any(Query().beschreibung.search(search_parameters.education_keyword)) \
-                  | _applicant.bildung.any(Query().lebenslaufartenKategorie.search(search_parameters.education_keyword)) \
-                  | _applicant.bildung.any(Query().nameArtEinrichtung.search(search_parameters.education_keyword)) \
-                  | _applicant.bildung.any(Query().schulAbschluss.search(search_parameters.education_keyword)) \
-                  | _applicant.bildung.any(Query().schulart.search(search_parameters.education_keyword)) \
-                  )
+          & ( \
+            _applicant.bildung.any(search_re_keyword(Query().ort, search_parameters.education_keyword)) \
+          | _applicant.bildung.any(search_re_keyword(Query().land, search_parameters.education_keyword)) \
+          | _applicant.bildung.any(search_re_keyword(Query().lebenslaufart, search_parameters.education_keyword)) \
+          | _applicant.bildung.any(search_re_keyword(Query().berufsbezeichnung, search_parameters.education_keyword)) \
+          | _applicant.bildung.any(search_re_keyword(Query().beschreibung, search_parameters.education_keyword)) \
+          | _applicant.bildung.any(search_re_keyword(Query().lebenslaufartenKategorie, search_parameters.education_keyword)) \
+          | _applicant.bildung.any(search_re_keyword(Query().nameArtEinrichtung, search_parameters.education_keyword)) \
+          | _applicant.bildung.any(search_re_keyword(Query().schulAbschluss, search_parameters.education_keyword)) \
+          | _applicant.bildung.any(search_re_keyword(Query().schulart, search_parameters.education_keyword)) \
+          )
       
       if query is None:
         query = subquery
