@@ -27,5 +27,7 @@ class SearchCriteriaSuggestion(BaseModel):
     locations: List[Text]
     jobTitles: List[Text]
     jobDescriptions: List[Text]
+    competences: List[Text]
     skills: List[Text]
+    licences: List[Text]
     languages: List[Text]
