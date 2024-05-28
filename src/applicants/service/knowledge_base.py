@@ -70,9 +70,9 @@ class LanguagesDb(KnowledgeBaseDb):
     def __init__(self, db_basepath: PathLike = "data/knowledge_base/languages.json"):
         super().__init__(db_basepath, "languages")
 
-class LicencesDb(KnowledgeBaseDb):
-    def __init__(self, db_basepath: PathLike = "data/knowledge_base/licences.json"):
-        super().__init__(db_basepath, "licences")
+class LicensesDb(KnowledgeBaseDb):
+    def __init__(self, db_basepath: PathLike = "data/knowledge_base/licenses.json"):
+        super().__init__(db_basepath, "licenses")
 
 class LocationDb(KnowledgeBaseDb):
     def __init__(self, db_basepath: PathLike = "data/knowledge_base/location.json"):
