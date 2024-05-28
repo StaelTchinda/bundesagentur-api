@@ -1,6 +1,3 @@
-import os
-print(os.getcwd())
-
 from typing import List, Text
 import logging
 
