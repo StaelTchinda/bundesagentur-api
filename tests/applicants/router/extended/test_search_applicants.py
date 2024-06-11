@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, List, Optional, Text
 import unittest
 from anyio import Path
@@ -17,7 +18,8 @@ from src.applicants.schemas.arbeitsagentur.enums import ContractType, Disability
 from src.applicants.schemas.extended.response import SearchApplicantsResponse
 from src.start import app
 from tests.utils.regex import search_regex_in_deep
-from tests.utils.values import LOCATIONS, SEARCH_KEYWORDS, GRADUATION_YEARS
+from tests.utils.values import EXPERIENCE_YEARS, LOCATIONS, SEARCH_KEYWORDS, GRADUATION_YEARS
+from src.applicants.service.extended.db import SearchedApplicantsDb
 
 class TestSearchApplicants(unittest.TestCase):
     API_PATH: Text = "/applicants/search"
@@ -25,6 +27,7 @@ class TestSearchApplicants(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestSearchApplicants, self).__init__(*args, **kwargs)
         self.client = TestClient(app)
+        self.db = SearchedApplicantsDb()
 
     def _test_response_is_valid(self, response: httpx.Response) -> SearchApplicantsResponse:
         self.assertEqual(response.status_code, 200)
@@ -50,9 +53,18 @@ class TestSearchApplicants(unittest.TestCase):
         search_response: SearchApplicantsResponse = self._test_response_is_valid(response)
         for applicant in search_response.applicants:
             self.assertIsNotNone(applicant.lokation)
-            if applicant.lokation.ort is not None:
+            if applicant.lokation is not None:
                 self.assertRegex(applicant.lokation.ort, location)
-                self.assertRegex
+        #applicantrefnr = [applicant for x in search_response.applicantRefnrs if "a" in x]
+        for applicant in self.db.get_all():
+            if applicant.refnr not in search_response.applicantRefnrs:
+                if applicant.lokation is not None: 
+                    self.assertNotRegex(applicant.lokation.ort, location)
+                else:
+                    self.assertIsNone(applicant.lokation)
+
+
+
 
     @parameterized.expand([working_time.value for working_time in WorkingTime]) 
     def test_parameter_working_time(self, working_time: Text):
@@ -84,7 +96,7 @@ class TestSearchApplicants(unittest.TestCase):
             has_graduated_before: bool = any([year <= max_graduation_year for year in graduation_years])
             self.assertTrue(has_graduated_before, f"None of the graduation years {graduation_years} is before {max_graduation_year}")
 
-    @parameterized
+    @parameterized.expand(EXPERIENCE_YEARS)
     def test_parameter_min_work_experience_years(self, min_work_experience_years: int):
         params: Dict = {
             "minWorkExperienceYears": min_work_experience_years
