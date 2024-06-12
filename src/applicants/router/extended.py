@@ -34,14 +34,15 @@ def fetch_applicants(params: Annotated[Dict, Depends(FetchParameters)]):
     db = SearchedApplicantsDb()
     searched_applicants_refnrs = []
     extended_search_params: FetchParameters = FetchParameters(**params.__dict__)
+    page_start: int = extended_search_params.pages_start if extended_search_params.pages_start is not None else 0
     for (page_idx, search_parameters) in enumerate(extended_search_params.get_original_search_params()):
         search_result_dict: Dict = api.search_applicants(search_parameters)
-        logger.info(f"Fetching resumes from page {page_idx + 1} with keys: {search_result_dict.keys()}")
+        logger.info(f"Fetching resumes from page {page_start + page_idx + 1} with keys: {search_result_dict.keys()}")
         if "messages" in search_result_dict:
             logger.warning(f"Error while fetching resumes: {search_result_dict['messages']}")
             raise HTTPException(status_code=400, detail=search_result_dict["messages"])
         elif "bewerber" not in search_result_dict:
-            logger.warning(f"No applicants found on page {page_idx + 1}")
+            logger.warning(f"No applicants found on page {page_start + page_idx + 1}")
             break
         search_result: ApplicantSearchResponse = ApplicantSearchResponse(**search_result_dict)
         for applicant in search_result.bewerber:
