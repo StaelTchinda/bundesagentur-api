@@ -49,6 +49,7 @@ class ExtendedSearchParameters(BaseModel):
     career_field: Optional[Text] = None
     working_time: WorkingTime = WorkingTime.UNDEFINED
     location_keyword: Optional[Text] = None
+    location_radius: Optional[int] = None
 
 
 class ExtendedDetailedSearchParameters(BaseModel):

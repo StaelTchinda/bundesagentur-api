@@ -8,7 +8,7 @@ import logging
 
 
 from src.applicants.schemas.arbeitsagentur.enums import WorkingTime
-from src.applicants.schemas.arbeitsagentur.schemas import LebenslaufElement, TimePeriod
+from src.applicants.schemas.arbeitsagentur.schemas import LebenslaufElement, Lokation, TimePeriod
 from src.applicants.schemas.extended.request import ExtendedSearchParameters, ExtendedDetailedSearchParameters
 from src.configs import DEFAULT_LOGGING_CONFIG
 
@@ -95,9 +95,11 @@ def build_search_query(search_parameters: ExtendedSearchParameters) -> Optional[
 
   if search_parameters.location_keyword is not None:
     _applicant = Query()
+    location_filter = Lokation.build_location_filter(search_parameters.location_keyword, search_parameters.location_radius)
+    test_location = lambda location: search_parameters.location_keyword is not None and location_filter(Lokation(**location))
     subquery = _applicant.lokation.exists() \
-                & _applicant.lokation.ort.exists() \
-                & search_re_keyword(_applicant.lokation.ort, search_parameters.location_keyword)
+                & _applicant.lokation.test(test_location) 
+    
 
     if query is None:
       query = subquery

@@ -163,3 +163,4 @@ cython_debug/
 data/db
 logs
 .DS_Store
+cache
