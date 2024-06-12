@@ -66,6 +66,7 @@ def search_applicants(
     careerField: Text = Query(None),
     workingTime: WorkingTime = WorkingTime.UNDEFINED,
     locationKeyword: Text = Query(None),
+    locationRadius: int = Query(None),
 
     page: int = 1,
     size: int = 25,
@@ -76,7 +77,8 @@ def search_applicants(
         min_work_experience_years=minWorkExperienceYears,
         career_field=careerField,
         working_time=workingTime,
-        location_keyword=locationKeyword
+        location_keyword=locationKeyword,
+        location_radius=locationRadius
     )
 
     query = build_search_query(search_parameters)
