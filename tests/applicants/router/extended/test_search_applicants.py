@@ -17,7 +17,7 @@ from src.applicants.schemas.arbeitsagentur.schemas import BewerberUebersicht, Ti
 from src.applicants.schemas.arbeitsagentur.enums import ContractType, Disability, EducationType, LocationRadius, OfferType, WorkExperience, WorkingTime
 from src.applicants.schemas.extended.response import SearchApplicantsResponse
 from src.start import app
-from tests.utils.regex import search_regex_in_deep
+from tests.utils.regex import ignore_case_in_regex, search_regex_in_deep
 from tests.utils.values import DEFAULT_PAGE_SIZE, EXPERIENCE_YEARS, LOCATIONS, SEARCH_KEYWORDS, GRADUATION_YEARS
 from src.applicants.service.extended.db import SearchedApplicantsDb
 
@@ -60,7 +60,7 @@ class TestSearchApplicants(unittest.TestCase):
             for candidate in search_response.applicants:
                 self.assertIsNotNone(candidate.lokation)
                 if candidate.lokation is not None:
-                    self.assertRegex(candidate.lokation.ort, location)
+                    self.assertRegex(ignore_case_in_regex(candidate.lokation.ort), location)
 
             all_matching_applicant_refnrs.extend(search_response.applicantRefnrs)
             if DEFAULT_PAGE_SIZE * next_page < search_response.maxCount:
