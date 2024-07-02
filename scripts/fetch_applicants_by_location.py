@@ -1,20 +1,15 @@
 import argparse
 import logging
-from tkinter import E
-from typing import Dict, List, Text, Union
-from tinydb import Query
+from typing import Dict, Text
 from tqdm import tqdm
-import os
 
 from src.configs import DEFAULT_LOGGING_CONFIG
 from src.applicants.router.arbeitsagentur import search_applicants
 from src.applicants.schemas.arbeitsagentur.request import SearchParameters
-from src.applicants.schemas.arbeitsagentur.schemas import ApplicantSearchResponse, FacettenElement
-from src.applicants.service.extended.db import DetailedApplicantsDb
+from src.applicants.schemas.arbeitsagentur.schemas import ApplicantSearchResponse
 from src.applicants.schemas.arbeitsagentur.enums import ContractType, Disability, EducationType, LocationRadius, OfferType, WorkExperience, WorkingTime
-from src.applicants.router.extended import fetch_applicant_details, fetch_applicants
-from src.applicants.schemas.extended.request import FetchApplicantsRequest
-from src.applicants.schemas.extended.response import FetchApplicantsResponse, FetchDetailedApplicantsResponse, SearchApplicantsResponse
+from src.applicants.router.extended import fetch_applicants
+from src.applicants.schemas.extended.response import FetchApplicantsResponse
 
 
 logging.basicConfig(**DEFAULT_LOGGING_CONFIG)
@@ -24,19 +19,6 @@ logger = logging.getLogger(__name__)
 def parse_args():
     parser = argparse.ArgumentParser("Fetch resumes of applicants from the Arbeitsagentur to the local DB")
 
-    # searchKeyword: Text | None = None,
-    # educationType: EducationType = EducationType.UNDEFINED,
-    # locationKeyword: Text | None = None,
-    # locationRadius: LocationRadius = LocationRadius.ZERO,
-    # offerType: OfferType = OfferType.WORKER,
-    # workingTime: WorkingTime = WorkingTime.UNDEFINED,
-    # workExperience: WorkExperience = WorkExperience.WITH_EXPERIENCE,
-    # contractType: ContractType = ContractType.UNDEFINED,
-    # disability: Disability = Disability.UNDEFINED,
-    # page: int = 1,
-    # size: int = 25,
-
-    # Add the arguments from the above class to the parser
     parser.add_argument("--keyword", type=str, help="Keyword to search for", default=None)
     parser.add_argument("--education_type", type=str, choices=[e.value for e in EducationType], help="Education type", default=EducationType.UNDEFINED.param_value)
     parser.add_argument("--location_keyword", type=str, help="Location keyword", default=None)
