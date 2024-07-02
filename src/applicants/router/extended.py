@@ -48,7 +48,7 @@ def fetch_applicants(
     db = SearchedApplicantsDb()
     searched_applicants_refnrs = []
     start = pages_start or 0
-    for page_idx in range(start, pages_count):
+    for page_idx in range(start, start+pages_count):
         search_parameters = SearchParameters(
             searchKeyword=searchKeyword,
             educationType=educationType,
