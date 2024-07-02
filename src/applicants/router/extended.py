@@ -40,6 +40,8 @@ def fetch_applicants(
     pages_count: int = 1,
     pages_start: Optional[int] = None,
     size: int = 25,
+    # Further filter options
+    locations: List[Text] = [],
 ):
     api = ApplicantApi()
     api.init()
