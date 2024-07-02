@@ -1,4 +1,4 @@
-from typing import Dict, Text
+from typing import Dict, List, Text
 from fastapi import APIRouter
 import logging
 
@@ -28,6 +28,8 @@ def search_applicants(
     disability: Disability = Disability.UNDEFINED,
     page: int = 1,
     size: int = 25,
+    # Further filter options
+    locations: List[Text] = [],
 ):
     search_parameters = SearchParameters(
         searchKeyword=searchKeyword,
@@ -41,6 +43,8 @@ def search_applicants(
         disability=disability,
         page=page,
         size=size,
+        # Further filter options
+        locations=locations
     )
     api = ApplicantApi()
     api.init()

@@ -59,6 +59,8 @@ def fetch_applicants(
             disability=disability,
             page=page_idx + 1,
             size=size,
+            # Further filter options
+            locations=locations
         )
         search_result_dict: Dict = api.search_applicants(search_parameters)
         logger.info(f"Fetching resumes from page {page_idx + 1} with keys: {search_result_dict.keys()}")

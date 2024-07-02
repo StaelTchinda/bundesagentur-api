@@ -1,4 +1,4 @@
-from typing import Union, Text, Dict
+from typing import List, Union, Text, Dict
 from pydantic import BaseModel
 from src.applicants.schemas.arbeitsagentur.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 
@@ -15,6 +15,14 @@ class SearchParameters(BaseModel):
     disability: Union[Disability, None]
     page: Union[int, None]
     size: Union[int, None]
+    # publicationDateAge: Union[int, None] # Acceptable values: 1, 7, 14, 28
+    # accessibility: Union[Accessibiltiy, None] # Params values: E-Mail;Telefon;Post
+
+    # Filter criteria with text values
+    locations: Union[List[Text], None]
+    # occupationalFields: Union[List[Text], None]
+    # occupations: Union[List[Text], None]
+    # ...
 
 SEARCH_PARAMETERS_TO_GET_PARAMS: Dict[Text, Text] = {
     "searchKeyword": "was",
@@ -27,6 +35,8 @@ SEARCH_PARAMETERS_TO_GET_PARAMS: Dict[Text, Text] = {
     "contractType": "vertragsart",
     "disability": "behinderung",
     "page": "page",
-    "size": "size"
+    "size": "size",
+
+    "locations": "arbeitsorte",
 }
 
