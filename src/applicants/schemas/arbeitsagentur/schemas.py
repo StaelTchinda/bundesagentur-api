@@ -8,7 +8,6 @@ import json
 from pydantic import BaseModel
 
 from src.applicants.schemas.arbeitsagentur.enums import JobType, WorkingTime
-from tests.utils import regex
 from src.utils.location.openplz import Locality, get_localities
 from src.utils.location.zip import CountryCode, RadiusLocality, get_localities_in_radius
 from src.configs import DEFAULT_LOGGING_CONFIG
