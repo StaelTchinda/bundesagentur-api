@@ -121,6 +121,8 @@ def main():
             global_fetch_pbar_postfix["location_candidates"]["count"] += fetch_response.count
             global_fetch_pbar.update(fetch_response.count)
             global_fetch_pbar.set_postfix(build_postfix_dict(global_fetch_pbar_postfix))
-
+            if fetch_response.count < args.size:
+                break
+    
 if __name__ == "__main__":
     main()
