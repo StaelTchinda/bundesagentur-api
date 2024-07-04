@@ -64,7 +64,7 @@ def search_applicants(
     minWorkExperienceYears: int = Query(None),
     careerField: Text = Query(None),
     workingTime: WorkingTime = WorkingTime.UNDEFINED,
-    locationKeyword: Text = Query(None)
+    locationKeyword: Text = Query(None),
 
     page: int = 1,
     size: int = 25,
