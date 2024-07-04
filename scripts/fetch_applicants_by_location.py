@@ -41,7 +41,6 @@ def parse_args():
 
 # TODO: Move to utils
 def get_location_counts(search_parameters: SearchParameters) -> Dict[Text, int]:
-    _search_parameters = SearchParameters(**search_parameters.model_dump())
     if search_parameters.page != 1:
         logger.warning("The page number should be 1 to ensure getting the location counts.")
     if search_parameters.size != 1:
@@ -89,40 +88,46 @@ def main():
     global_fetch_pbar_postfix: Dict = {"location": "", "location_candidates": {"count": 0, "skipped": 0, "total": 0}, "locations": {"count": 0, "skipped": 0, "total": len(location_counts)}}
     build_postfix_dict_elt_str = lambda postfix_elt: f"{postfix_elt['count']}/{postfix_elt['total']}-{postfix_elt['skipped']}"
     build_postfix_dict = lambda postfix: {"location": postfix["location"], "location_candidates": build_postfix_dict_elt_str(postfix["location_candidates"]), "locations": build_postfix_dict_elt_str(postfix["locations"])}
-    for (location, location_candidate_count) in location_counts.items():
-        pages_count: int = max(args.pages_count, location_candidate_count // args.size + 1)
-        global_fetch_pbar_postfix["location"] = location
-        global_fetch_pbar_postfix["location_candidates"]["count"] = 0
-        global_fetch_pbar_postfix["location_candidates"]["total"] = location_candidate_count
-        if args.pages_start is not None:
-            global_fetch_pbar_postfix["location_candidates"]["skipped"] = args.pages_start * args.size
-            global_fetch_pbar.update(args.pages_start * args.size)
-        global_fetch_pbar.set_postfix(build_postfix_dict(global_fetch_pbar_postfix))
-
-        pages_start: int = args.pages_start if args.pages_start is not None else 1
-        for page_idx in range(pages_start, pages_count):
-            fetch_params: FetchParameters = FetchParameters(
-                searchKeyword=args.keyword,
-                educationType=EducationType(args.education_type).value,
-                locationKeyword=args.location_keyword,
-                locationRadius=LocationRadius(args.location_radius).value,
-                offerType=OfferType(args.offer_type).value,
-                workingTime=InputWorkingTime(args.working_time).value,
-                workExperience=WorkExperience(args.work_experience).value,
-                contractType=ContractType(args.contract_type).value,
-                disability=Disability(args.disability).value,
-                pages_count=1,
-                pages_start=page_idx,
-                size=args.size,
-                locations=[location]
-            )
-            fetch_response_dict: Dict = fetch_applicants(fetch_params)
-            fetch_response = FetchApplicantsResponse(**fetch_response_dict)
-            global_fetch_pbar_postfix["location_candidates"]["count"] += fetch_response.count
-            global_fetch_pbar.update(fetch_response.count)
+    try:
+        for (location, location_candidate_count) in location_counts.items():
+            pages_count: int = max(args.pages_count, location_candidate_count // args.size + 1)
+            global_fetch_pbar_postfix["location"] = location
+            global_fetch_pbar_postfix["location_candidates"]["count"] = 0
+            global_fetch_pbar_postfix["location_candidates"]["total"] = location_candidate_count
+            global_fetch_pbar_postfix["locations"]["count"] += 1
+            if args.pages_start is not None:
+                global_fetch_pbar_postfix["location_candidates"]["skipped"] = args.pages_start * args.size
+                global_fetch_pbar.update(args.pages_start * args.size)
             global_fetch_pbar.set_postfix(build_postfix_dict(global_fetch_pbar_postfix))
-            if fetch_response.count < args.size:
-                break
-    
+
+            pages_start: int = args.pages_start if args.pages_start is not None else 1
+            for page_idx in range(pages_start, pages_count):
+                fetch_params: FetchParameters = FetchParameters(
+                    searchKeyword=args.keyword,
+                    educationType=EducationType(args.education_type).value,
+                    locationKeyword=args.location_keyword,
+                    locationRadius=LocationRadius(args.location_radius).value,
+                    offerType=OfferType(args.offer_type).value,
+                    workingTime=InputWorkingTime(args.working_time).value,
+                    workExperience=WorkExperience(args.work_experience).value,
+                    contractType=ContractType(args.contract_type).value,
+                    disability=Disability(args.disability).value,
+                    pages_count=1,
+                    pages_start=page_idx,
+                    size=args.size,
+                    locations=[location]
+                )
+                fetch_response_dict: Dict = fetch_applicants(fetch_params)
+                fetch_response = FetchApplicantsResponse(**fetch_response_dict)
+                global_fetch_pbar_postfix["location_candidates"]["count"] += fetch_response.count
+                global_fetch_pbar.update(fetch_response.count)
+                global_fetch_pbar.set_postfix(build_postfix_dict(global_fetch_pbar_postfix))
+                if fetch_response.count < args.size:
+                    break
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+    finally:
+        global_fetch_pbar.close()
+        print("Finished fetching applicants.")
 if __name__ == "__main__":
     main()
