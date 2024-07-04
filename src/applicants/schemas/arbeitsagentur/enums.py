@@ -38,6 +38,7 @@ class ParamEnum(Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.__flex_init__(value)
+        return cls.__flex_init__(value)
 
     @property
     def value(self):
@@ -113,6 +114,10 @@ class ContractType(ParamEnum):
 
 
 class Disability(ParamEnum):
+    ONLY_SEVERELY_DISABLED = (
+        "Nur Schwerbehinderte oder ihnen gleichgestellte Bewerber*innen anzeigen",
+        1,
+    )
     ONLY_SEVERELY_DISABLED = (
         "Nur Schwerbehinderte oder ihnen gleichgestellte Bewerber*innen anzeigen",
         1,

@@ -8,3 +8,4 @@ DEFAULT_LOGGING_CONFIG: Dict[Text, Any] = {
     "filemode": "a",
     "filename": "logs/api.log",
 }
+

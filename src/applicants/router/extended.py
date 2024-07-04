@@ -26,6 +26,29 @@ from src.applicants.service.extended.db import (
     DetailedApplicantsDb,
     SearchedApplicantsDb,
 )
+from src.applicants.service.knowledge_base import (
+    CompetencesDb,
+    JobsDb,
+    LanguagesDb,
+    LicensesDb,
+    LocationDb,
+    SkillsDb,
+    WorkfieldsDb,
+)
+from src.applicants.schemas.extended.request import (
+    ExtendedDetailedSearchParameters,
+    ExtendedSearchParameters,
+    FetchParameters,
+)
+from src.applicants.schemas.extended.response import (
+    FetchApplicantsResponse,
+    SearchApplicantsResponse,
+    SearchCriteriaSuggestion,
+)
+from src.applicants.service.extended.db import (
+    DetailedApplicantsDb,
+    SearchedApplicantsDb,
+)
 from src.applicants.schemas.arbeitsagentur.request import SearchParameters
 from src.applicants.schemas.extended.request import FetchApplicantsDetailsRequest
 from src.applicants.service.extended.query import (
@@ -33,7 +56,25 @@ from src.applicants.service.extended.query import (
     build_search_query,
     build_detailed_search_query,
 )
+from src.applicants.service.extended.query import (
+    build_knowledge_search_query,
+    build_search_query,
+    build_detailed_search_query,
+)
 from src.applicants.schemas.arbeitsagentur.response import ApplicantSearchResponse
+from src.applicants.schemas.arbeitsagentur.enums import (
+    EducationType,
+    LocationRadius,
+    OfferType,
+    WorkingTime,
+    WorkExperience,
+    ContractType,
+    Disability,
+)
+from src.applicants.schemas.arbeitsagentur.schemas import (
+    BewerberDetail,
+    BewerberUebersicht,
+)
 from src.applicants.schemas.arbeitsagentur.enums import (
     EducationType,
     LocationRadius,
@@ -76,11 +117,25 @@ def fetch_applicants(params: Annotated[Dict, Depends(FetchParameters)]):
     for page_idx, search_parameters in enumerate(
         extended_search_params.get_original_search_params()
     ):
+    page_start: int = (
+        extended_search_params.pages_start
+        if extended_search_params.pages_start is not None
+        else 0
+    )
+    for page_idx, search_parameters in enumerate(
+        extended_search_params.get_original_search_params()
+    ):
         search_result_dict: Dict = api.search_applicants(search_parameters)
         logger.info(
             f"Fetching resumes from page {page_start + page_idx + 1} with keys: {search_result_dict.keys()}"
         )
+        logger.info(
+            f"Fetching resumes from page {page_start + page_idx + 1} with keys: {search_result_dict.keys()}"
+        )
         if "messages" in search_result_dict:
+            logger.warning(
+                f"Error while fetching resumes: {search_result_dict['messages']}"
+            )
             logger.warning(
                 f"Error while fetching resumes: {search_result_dict['messages']}"
             )
@@ -91,12 +146,17 @@ def fetch_applicants(params: Annotated[Dict, Depends(FetchParameters)]):
         search_result: ApplicantSearchResponse = ApplicantSearchResponse(
             **search_result_dict
         )
+        search_result: ApplicantSearchResponse = ApplicantSearchResponse(
+            **search_result_dict
+        )
         for applicant in search_result.bewerber:
             db.upsert(applicant)
             searched_applicants_refnrs.append(applicant.refnr)
 
+
     response = {
         "count": len(searched_applicants_refnrs),
+        "applicantRefnrs": searched_applicants_refnrs,
         "applicantRefnrs": searched_applicants_refnrs,
     }
 
@@ -139,11 +199,17 @@ def search_applicants(
     logger.info(f"Found in total {total_count} applicants")
 
     applicants = applicants[(page - 1) * size : (page - 1) * size + size]
+    applicants = applicants[(page - 1) * size : (page - 1) * size + size]
 
     response = {
         "maxCount": total_count,
         "count": len(applicants),
         "applicantRefnrs": [candidate.refnr for candidate in applicants],
+        "applicantLinks": [
+            f"https://www.arbeitsagentur.de/bewerberboerse/bewerberdetail/{candidate.refnr}"
+            for candidate in applicants
+        ],
+        "applicants": applicants,
         "applicantLinks": [
             f"https://www.arbeitsagentur.de/bewerberboerse/bewerberdetail/{candidate.refnr}"
             for candidate in applicants
@@ -157,6 +223,9 @@ def search_applicants(
 @router.post(
     "/applicants/fetch/details", response_model=FetchDetailedApplicantsResponse
 )
+@router.post(
+    "/applicants/fetch/details", response_model=FetchDetailedApplicantsResponse
+)
 def fetch_applicant_details(request: FetchApplicantsDetailsRequest):
     applicant_ids: List[Text] = request.applicantIds
 
@@ -164,10 +233,17 @@ def fetch_applicant_details(request: FetchApplicantsDetailsRequest):
     api = ApplicantApi()
     api.init()
 
+
     all_applicants_details: List[BewerberDetail] = []
     for applicant_id in applicant_ids:
         applicant_details_dict: Dict = api.get_applicant(applicant_id)
         if "messages" in applicant_details_dict:
+            logger.warning(
+                f"Error while fetching details for applicant {applicant_id}: {applicant_details_dict['messages']}"
+            )
+            raise HTTPException(
+                status_code=400, detail=applicant_details_dict["messages"]
+            )
             logger.warning(
                 f"Error while fetching details for applicant {applicant_id}: {applicant_details_dict['messages']}"
             )
@@ -183,6 +259,7 @@ def fetch_applicant_details(request: FetchApplicantsDetailsRequest):
 
     response = {
         "count": len(all_applicants_details),
+        "applicantRefnrs": [applicant.refnr for applicant in all_applicants_details],
         "applicantRefnrs": [applicant.refnr for applicant in all_applicants_details],
     }
 
@@ -213,6 +290,7 @@ def search_applicant_details(
         education_keyword=educationKeyword,
         skills=skills,
         languages=languages,
+        languages=languages,
     )
 
     query = build_detailed_search_query(search_parameters)
@@ -226,8 +304,10 @@ def search_applicant_details(
         applicants = db.get_all()
 
     total_count: int = len(applicants)
+    total_count: int = len(applicants)
     logger.info(f"Found in total {total_count} applicants")
 
+    applicants = applicants[(page - 1) * size : (page - 1) * size + size]
     applicants = applicants[(page - 1) * size : (page - 1) * size + size]
 
     response = {
@@ -239,12 +319,19 @@ def search_applicant_details(
             for candidate in applicants
         ],
         "applicants": applicants,
+        "applicantLinks": [
+            f"https://www.arbeitsagentur.de/bewerberboerse/bewerberdetail/{candidate.refnr}"
+            for candidate in applicants
+        ],
+        "applicants": applicants,
     }
+
 
     return response
 
 
 @router.post("/applicants/suggest_criteria", response_model=SearchCriteriaSuggestion)
+def suggest_criteria(job_description: Text = Query()):
 def suggest_criteria(job_description: Text = Query()):
     query = build_knowledge_search_query(job_description)
     logger.info(f"Query: {query}")
@@ -277,5 +364,6 @@ def suggest_criteria(job_description: Text = Query()):
         "competences": competences_results,
         "skills": skills_results,
         "licenses": licenses_results,
+        "languages": languages_results,
         "languages": languages_results,
     }

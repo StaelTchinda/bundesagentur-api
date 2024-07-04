@@ -11,6 +11,16 @@ from src.applicants.schemas.arbeitsagentur.enums import (
     ContractType,
     Disability,
 )
+from src.applicants.schemas.arbeitsagentur.enums import (
+    EducationType,
+    InputWorkingTime,
+    LocationRadius,
+    OfferType,
+    WorkingTime,
+    WorkExperience,
+    ContractType,
+    Disability,
+)
 
 
 class SearchParameters(BaseModel):
