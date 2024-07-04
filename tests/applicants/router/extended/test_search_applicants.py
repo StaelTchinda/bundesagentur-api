@@ -1,6 +1,7 @@
 import re
-from typing import Any, Dict, List, Optional, Text
+from typing import Any, Dict, Iterable, List, Optional, Text
 import unittest
+import warnings
 from anyio import Path
 from fastapi.testclient import TestClient
 import httpx
@@ -18,7 +19,7 @@ from src.applicants.schemas.arbeitsagentur.enums import ContractType, Disability
 from src.applicants.schemas.extended.response import SearchApplicantsResponse
 from src.start import app
 from tests.utils.regex import search_regex_in_deep
-from tests.utils.values import EXPERIENCE_YEARS, LOCATIONS, SEARCH_KEYWORDS, GRADUATION_YEARS
+from tests.utils.values import DEFAULT_PAGE_SIZE, EXPERIENCE_YEARS, LOCATIONS, SEARCH_KEYWORDS, GRADUATION_YEARS
 from src.applicants.service.extended.db import SearchedApplicantsDb
 
 class TestSearchApplicants(unittest.TestCase):
@@ -49,8 +50,7 @@ class TestSearchApplicants(unittest.TestCase):
         params: Dict = {
             "locationKeyword": location
         }
-        response = self.client.get(self.API_PATH, params=params)
-        search_response: SearchApplicantsResponse = self._test_response_is_valid(response)
+        search_response: SearchApplicantsResponse = self.search_over_all_pages(params)
         for applicant in search_response.applicants:
             self.assertIsNotNone(applicant.lokation)
             if applicant.lokation is not None:
@@ -58,12 +58,17 @@ class TestSearchApplicants(unittest.TestCase):
         #applicantrefnr = [applicant for x in search_response.applicantRefnrs if "a" in x]
         for applicant in self.db.get_all():
             if applicant.refnr not in search_response.applicantRefnrs:
-                if applicant.lokation is not None: 
-                    self.assertNotRegex(applicant.lokation.ort, location)
+                if applicant.lokation is not None:
+                    if applicant.lokation.ort is not None:
+                        self.assertNotRegex(applicant.lokation.ort, location)
+                    elif applicant.lokation.region is not None:
+                        self.assertNotRegex(applicant.lokation.region, location)
+                    else:
+                        self.assertIsNone(applicant.lokation.ort)
+                        self.assertIsNone(applicant.lokation.region)
+                        self.assertIsNone(applicant.lokation.plz)
                 else:
                     self.assertIsNone(applicant.lokation)
-
-
 
 
     @parameterized.expand([working_time.value for working_time in WorkingTime]) 
@@ -138,6 +143,62 @@ class TestSearchApplicants(unittest.TestCase):
 
         self.assertTrue(search_regex_in_deep(regex, obj), msg)
 
+
+    def search_over_all_pages(self, params: Dict) -> SearchApplicantsResponse:
+        params_with_page: Dict = params.copy()
+        if "page" in params_with_page:
+            warnings.warn("page parameter will be ignored")
+            del params_with_page["page"]
+
+        if "size" not in params_with_page:
+            params_with_page["size"] = DEFAULT_PAGE_SIZE
+            warnings.warn(f"size parameter not found, using default page size {DEFAULT_PAGE_SIZE}")
+        
+        has_reached_last_page: bool = False
+        current_page: int = 1
+        final_response: SearchApplicantsResponse = None
+        while not has_reached_last_page:
+            params_with_page["page"] = current_page
+            response = self.client.get(self.API_PATH, params=params_with_page)
+            search_response: SearchApplicantsResponse = self._test_response_is_valid(response)
+            if final_response is None:
+                final_response = search_response
+            else:
+                final_response = merge_responses([final_response, search_response])
+            self.assertGreaterEqual(final_response.maxCount, final_response.count)
+            if search_response.count < params_with_page["size"]:
+                has_reached_last_page = True
+            else:
+                current_page += 1
+        self.assertEqual(final_response.count, final_response.maxCount)
+
+        return final_response
+
+
+def get_empty_response() -> SearchApplicantsResponse:
+    return SearchApplicantsResponse(
+        count=0,
+        maxCount=0,
+        applicantRefnrs=[],
+        applicantLinks=[],
+        applicants=[]
+    )
+
+def merge_responses(responses: Iterable[SearchApplicantsResponse]) -> SearchApplicantsResponse:
+    merged_response: SearchApplicantsResponse = get_empty_response()
+    is_first_response: bool = True
+    for response in responses:
+        if is_first_response:
+            merged_response.maxCount = response.maxCount
+            is_first_response = False
+        elif response.maxCount != merged_response.maxCount:
+            raise ValueError(f"Max count of response {response} does not match max count of merged response {merged_response}")
+        merged_response.count += response.count
+        merged_response.applicantRefnrs.extend(response.applicantRefnrs)
+        merged_response.applicantLinks.extend(response.applicantLinks)
+        merged_response.applicants.extend(response.applicants)
+
+    return merged_response
 
 if __name__ == "__main__":
     unittest.main()
