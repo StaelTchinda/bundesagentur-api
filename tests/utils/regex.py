@@ -2,6 +2,10 @@ import re
 from typing import Any, Dict, List, Text, Union
 
 
+def ignore_case_in_regex(regex: Text) -> Text:
+    return f"(?i){regex}"
+
+
 def search_regex_in_deep(
     regex: Text, 
     obj: Union[Text, Dict[Text, Any], List[Text], List[Dict[Text, Any]]], 

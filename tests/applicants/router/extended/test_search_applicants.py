@@ -14,11 +14,11 @@ sys.path.append(str(PROJECT_PATH))
 
 print("PROJECT_PATH", PROJECT_PATH)
 
-from src.applicants.schemas.arbeitsagentur.schemas import TimePeriod
+from src.applicants.schemas.arbeitsagentur.schemas import BewerberUebersicht, TimePeriod
 from src.applicants.schemas.arbeitsagentur.enums import ContractType, Disability, EducationType, LocationRadius, OfferType, WorkExperience, WorkingTime
 from src.applicants.schemas.extended.response import SearchApplicantsResponse
 from src.start import app
-from tests.utils.regex import search_regex_in_deep
+from tests.utils.regex import ignore_case_in_regex, search_regex_in_deep
 from tests.utils.values import DEFAULT_PAGE_SIZE, EXPERIENCE_YEARS, LOCATIONS, SEARCH_KEYWORDS, GRADUATION_YEARS
 from src.applicants.service.extended.db import SearchedApplicantsDb
 
@@ -48,13 +48,14 @@ class TestSearchApplicants(unittest.TestCase):
     @parameterized.expand(LOCATIONS)
     def test_parameter_location(self, location: Text):
         params: Dict = {
-            "locationKeyword": location
+            "locationKeyword": location,
+            "size": DEFAULT_PAGE_SIZE
         }
         search_response: SearchApplicantsResponse = self.search_over_all_pages(params)
         for applicant in search_response.applicants:
             self.assertIsNotNone(applicant.lokation)
             if applicant.lokation is not None:
-                self.assertRegex(applicant.lokation.ort, location)
+                    self.assertRegex(ignore_case_in_regex(candidate.lokation.ort), location)
         #applicantrefnr = [applicant for x in search_response.applicantRefnrs if "a" in x]
         for applicant in self.db.get_all():
             if applicant.refnr not in search_response.applicantRefnrs:
