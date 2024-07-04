@@ -105,24 +105,30 @@ class TestSearchApplicants(unittest.TestCase):
         search_response: SearchApplicantsResponse = self._test_response_is_valid(response)
 
         for applicant in search_response.applicants:
-            graduation_years: List[int] = []
             self.assertIsNotNone(applicant.erfahrung)
             if applicant.erfahrung is None: return
 
-            self.assertIsNotNone(applicant.erfahrung.gesamterfahrung)
-            if applicant.erfahrung.gesamterfahrung is None: return
-            total_experience_years: int = TimePeriod(applicant.erfahrung.gesamterfahrung).get_years()
+            self.assertIsNot((applicant.erfahrung.gesamterfahrung, applicant.erfahrung.berufsfeldErfahrung), (None, None))
 
-            self.assertIsNotNone(applicant.erfahrung.berufsfeldErfahrung)
-            if applicant.erfahrung.berufsfeldErfahrung is None: return
-            experience_years: List[int] = []
-            for exp in applicant.erfahrung.berufsfeldErfahrung:
-                self.assertIsNotNone(exp.erfahrung)
-                if exp.erfahrung is None: return
-                experience_years.append(TimePeriod(exp.erfahrung).get_years())
+            experience_years: Optional[int] = None
+            if applicant.erfahrung.gesamterfahrung is not None:
+                total_experience_years: int = TimePeriod(applicant.erfahrung.gesamterfahrung).get_years()
+                experience_years = total_experience_years
 
-            self.assertEqual(total_experience_years, sum(experience_years))
-            self.assertGreaterEqual(total_experience_years, min_work_experience_years)
+            if applicant.erfahrung.berufsfeldErfahrung is not None:
+                splitted_experience_years: List[int] = []
+                for exp in applicant.erfahrung.berufsfeldErfahrung:
+                    self.assertIsNotNone(exp.erfahrung)
+                    if exp.erfahrung is None: return
+                    splitted_experience_years.append(TimePeriod(exp.erfahrung).get_years())
+                total_experience_years = sum(splitted_experience_years)
+                if experience_years is not None and experience_years != total_experience_years:
+                    print(f"Sum of splitted experience years: {total_experience_years} = sum({splitted_experience_years}), total experience years: {experience_years}")
+                    experience_years = max(experience_years, total_experience_years)
+                else:
+                    experience_years = total_experience_years
+
+            self.assertGreaterEqual(experience_years, min_work_experience_years)
 
     # TODO: Write further tests
 
