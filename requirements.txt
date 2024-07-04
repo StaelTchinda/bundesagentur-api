@@ -5,6 +5,6 @@ uvicorn
 tqdm
 
 tinydb
-
-unittest
+pytest
 parameterized
+# unittest

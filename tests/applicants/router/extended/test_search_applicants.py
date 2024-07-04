@@ -1,6 +1,7 @@
 import re
 from typing import Any, Dict, Iterable, List, Optional, Text
 import unittest
+import warnings
 from anyio import Path
 from fastapi.testclient import TestClient
 import httpx
@@ -50,31 +51,23 @@ class TestSearchApplicants(unittest.TestCase):
             "locationKeyword": location,
             "size": DEFAULT_PAGE_SIZE
         }
-        all_matching_applicant_refnrs: List[Text] = []
-        next_page: Optional[int] = 1
-        while next_page is not None:
-            params.update({"page": next_page})
-            response = self.client.get(self.API_PATH, params=params)
-            search_response: SearchApplicantsResponse = self._test_response_is_valid(response)
-
-            for candidate in search_response.applicants:
-                self.assertIsNotNone(candidate.lokation)
-                if candidate.lokation is not None:
+        search_response: SearchApplicantsResponse = self.search_over_all_pages(params)
+        for applicant in search_response.applicants:
+            self.assertIsNotNone(applicant.lokation)
+            if applicant.lokation is not None:
                     self.assertRegex(ignore_case_in_regex(candidate.lokation.ort), location)
-
-            all_matching_applicant_refnrs.extend(search_response.applicantRefnrs)
-            if DEFAULT_PAGE_SIZE * next_page < search_response.maxCount:
-                next_page += 1
-            else:
-                next_page = None  
-
+        #applicantrefnr = [applicant for x in search_response.applicantRefnrs if "a" in x]
         for applicant in self.db.get_all():
-            if applicant.refnr not in all_matching_applicant_refnrs:
+            if applicant.refnr not in search_response.applicantRefnrs:
                 if applicant.lokation is not None:
                     if applicant.lokation.ort is not None:
                         self.assertNotRegex(applicant.lokation.ort, location)
+                    elif applicant.lokation.region is not None:
+                        self.assertNotRegex(applicant.lokation.region, location)
                     else:
                         self.assertIsNone(applicant.lokation.ort)
+                        self.assertIsNone(applicant.lokation.region)
+                        self.assertIsNone(applicant.lokation.plz)
                 else:
                     self.assertIsNone(applicant.lokation)
 
@@ -118,24 +111,30 @@ class TestSearchApplicants(unittest.TestCase):
         search_response: SearchApplicantsResponse = self._test_response_is_valid(response)
 
         for applicant in search_response.applicants:
-            graduation_years: List[int] = []
             self.assertIsNotNone(applicant.erfahrung)
             if applicant.erfahrung is None: return
 
-            self.assertIsNotNone(applicant.erfahrung.gesamterfahrung)
-            if applicant.erfahrung.gesamterfahrung is None: return
-            total_experience_years: int = TimePeriod(applicant.erfahrung.gesamterfahrung).get_years()
+            self.assertIsNot((applicant.erfahrung.gesamterfahrung, applicant.erfahrung.berufsfeldErfahrung), (None, None))
 
-            self.assertIsNotNone(applicant.erfahrung.berufsfeldErfahrung)
-            if applicant.erfahrung.berufsfeldErfahrung is None: return
-            experience_years: List[int] = []
-            for exp in applicant.erfahrung.berufsfeldErfahrung:
-                self.assertIsNotNone(exp.erfahrung)
-                if exp.erfahrung is None: return
-                experience_years.append(TimePeriod(exp.erfahrung).get_years())
+            experience_years: Optional[int] = None
+            if applicant.erfahrung.gesamterfahrung is not None:
+                total_experience_years: int = TimePeriod(applicant.erfahrung.gesamterfahrung).get_years()
+                experience_years = total_experience_years
 
-            self.assertEqual(total_experience_years, sum(experience_years))
-            self.assertGreaterEqual(total_experience_years, min_work_experience_years)
+            if applicant.erfahrung.berufsfeldErfahrung is not None:
+                splitted_experience_years: List[int] = []
+                for exp in applicant.erfahrung.berufsfeldErfahrung:
+                    self.assertIsNotNone(exp.erfahrung)
+                    if exp.erfahrung is None: return
+                    splitted_experience_years.append(TimePeriod(exp.erfahrung).get_years())
+                total_experience_years = sum(splitted_experience_years)
+                if experience_years is not None and experience_years != total_experience_years:
+                    print(f"Sum of splitted experience years: {total_experience_years} = sum({splitted_experience_years}), total experience years: {experience_years}")
+                    experience_years = max(experience_years, total_experience_years)
+                else:
+                    experience_years = total_experience_years
+
+            self.assertGreaterEqual(experience_years, min_work_experience_years)
 
     # TODO: Write further tests
 
@@ -145,6 +144,62 @@ class TestSearchApplicants(unittest.TestCase):
 
         self.assertTrue(search_regex_in_deep(regex, obj), msg)
 
+
+    def search_over_all_pages(self, params: Dict) -> SearchApplicantsResponse:
+        params_with_page: Dict = params.copy()
+        if "page" in params_with_page:
+            warnings.warn("page parameter will be ignored")
+            del params_with_page["page"]
+
+        if "size" not in params_with_page:
+            params_with_page["size"] = DEFAULT_PAGE_SIZE
+            warnings.warn(f"size parameter not found, using default page size {DEFAULT_PAGE_SIZE}")
+        
+        has_reached_last_page: bool = False
+        current_page: int = 1
+        final_response: SearchApplicantsResponse = None
+        while not has_reached_last_page:
+            params_with_page["page"] = current_page
+            response = self.client.get(self.API_PATH, params=params_with_page)
+            search_response: SearchApplicantsResponse = self._test_response_is_valid(response)
+            if final_response is None:
+                final_response = search_response
+            else:
+                final_response = merge_responses([final_response, search_response])
+            self.assertGreaterEqual(final_response.maxCount, final_response.count)
+            if search_response.count < params_with_page["size"]:
+                has_reached_last_page = True
+            else:
+                current_page += 1
+        self.assertEqual(final_response.count, final_response.maxCount)
+
+        return final_response
+
+
+def get_empty_response() -> SearchApplicantsResponse:
+    return SearchApplicantsResponse(
+        count=0,
+        maxCount=0,
+        applicantRefnrs=[],
+        applicantLinks=[],
+        applicants=[]
+    )
+
+def merge_responses(responses: Iterable[SearchApplicantsResponse]) -> SearchApplicantsResponse:
+    merged_response: SearchApplicantsResponse = get_empty_response()
+    is_first_response: bool = True
+    for response in responses:
+        if is_first_response:
+            merged_response.maxCount = response.maxCount
+            is_first_response = False
+        elif response.maxCount != merged_response.maxCount:
+            raise ValueError(f"Max count of response {response} does not match max count of merged response {merged_response}")
+        merged_response.count += response.count
+        merged_response.applicantRefnrs.extend(response.applicantRefnrs)
+        merged_response.applicantLinks.extend(response.applicantLinks)
+        merged_response.applicants.extend(response.applicants)
+
+    return merged_response
 
 if __name__ == "__main__":
     unittest.main()

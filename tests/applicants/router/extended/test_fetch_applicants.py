@@ -75,9 +75,9 @@ class TestFetchApplicants(unittest.TestCase):
         params: Dict = {
             "searchKeyword": keyword
         }
-        response = self.client.get("/applicants/arbeitsagentur/search", params=params)
-        search_response: FetchApplicantsResponse = self._test_response_is_valid(response)
-        for applicant_refnr in search_response.applicantRefnrs:
+        response = self.client.get(self.API_PATH, params=params)
+        fetch_response: FetchApplicantsResponse = self._test_response_is_valid(response)
+        for applicant_refnr in fetch_response.applicantRefnrs:
             applicant: Optional[BewerberUebersicht] = self.get_applicant_resume(applicant_refnr)
             self.assertIsNotNone(applicant)
             if applicant is None: return

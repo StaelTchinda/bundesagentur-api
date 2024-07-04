@@ -2,6 +2,7 @@ from typing import List, Text
 import logging
 
 
+from src.applicants.schemas.extended.response import SearchApplicantsResponse
 from src.applicants.router.extended import search_applicants
 from src.applicants.schemas.arbeitsagentur.enums import WorkingTime
 from src.applicants.schemas.arbeitsagentur.schemas import TimePeriod
@@ -114,11 +115,11 @@ def native_filter(
 
 
 def test_local_search():
-    max_graduation_year = 2015
+    max_graduation_year = 1975
     min_work_experience_years = 5
     career_field = "Software"
     working_time = WorkingTime.FULL_TIME
-    location_keyword = "Berlin"
+    location_keyword = "München"
 
     expected_candidates = native_filter(
         max_graduation_year,
@@ -130,7 +131,7 @@ def test_local_search():
 
     
 
-    candidates = search_applicants(
+    response = search_applicants(
         None,
         max_graduation_year,
         min_work_experience_years,
@@ -138,9 +139,7 @@ def test_local_search():
         working_time,
         location_keyword
     )
+    candidates = SearchApplicantsResponse(**response).applicants
 
     assert candidates == expected_candidates
 
-
-if __name__ == "__main__":
-    test_local_search()
