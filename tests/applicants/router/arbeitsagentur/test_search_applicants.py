@@ -7,15 +7,25 @@ from parameterized import parameterized
 
 PROJECT_PATH: Path = Path(__file__).parents[4]
 import sys
+
 sys.path.append(str(PROJECT_PATH))
 
 print("PROJECT_PATH", PROJECT_PATH)
 
-from src.applicants.schemas.arbeitsagentur.enums import ContractType, Disability, EducationType, LocationRadius, OfferType, WorkExperience, WorkingTime
+from src.applicants.schemas.arbeitsagentur.enums import (
+    ContractType,
+    Disability,
+    EducationType,
+    LocationRadius,
+    OfferType,
+    WorkExperience,
+    WorkingTime,
+)
 from src.applicants.schemas.arbeitsagentur.schemas import ApplicantSearchResponse
 from src.start import app
 from tests.utils.regex import search_regex_in_deep
 from tests.utils.values import LOCATIONS, SEARCH_KEYWORDS
+
 
 class TestSearchApplicants(unittest.TestCase):
     API_PATH: Text = "/applicants/arbeitsagentur/search"
@@ -24,51 +34,65 @@ class TestSearchApplicants(unittest.TestCase):
         super(TestSearchApplicants, self).__init__(*args, **kwargs)
         self.client = TestClient(app)
 
-    def _test_response_is_valid(self, response: httpx.Response) -> ApplicantSearchResponse:
+    def _test_response_is_valid(
+        self, response: httpx.Response
+    ) -> ApplicantSearchResponse:
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json().keys(), ApplicantSearchResponse.model_fields.keys())
-        search_response: ApplicantSearchResponse = ApplicantSearchResponse(**response.json())
+        self.assertEqual(
+            response.json().keys(), ApplicantSearchResponse.model_fields.keys()
+        )
+        search_response: ApplicantSearchResponse = ApplicantSearchResponse(
+            **response.json()
+        )
         return search_response
 
     def test_no_parameters(self):
         response = self.client.get(self.API_PATH)
-        search_response: ApplicantSearchResponse = self._test_response_is_valid(response)
+        search_response: ApplicantSearchResponse = self._test_response_is_valid(
+            response
+        )
         self.assertGreater(len(search_response.bewerber), 0)
 
     @parameterized.expand(LOCATIONS)
     def test_parameter_location(self, location: Text):
-        params: Dict = {
-            "locationKeyword": location
-        }
+        params: Dict = {"locationKeyword": location}
         response = self.client.get(self.API_PATH, params=params)
-        search_response: ApplicantSearchResponse = self._test_response_is_valid(response)
+        search_response: ApplicantSearchResponse = self._test_response_is_valid(
+            response
+        )
         for applicant in search_response.bewerber:
             self.assertIsNotNone(applicant.lokation)
             if applicant.lokation.ort is not None:
                 self.assertRegex(applicant.lokation.ort, location)
                 self.assertRegex
 
-    @parameterized.expand([working_time.value for working_time in WorkingTime]) 
+    @parameterized.expand([working_time.value for working_time in WorkingTime])
     def test_parameter_working_time(self, working_time: Text):
-        params: Dict = {
-            "workingTime": working_time
-        }
+        params: Dict = {"workingTime": working_time}
         response = self.client.get(self.API_PATH, params=params)
-        search_response: ApplicantSearchResponse = self._test_response_is_valid(response)
+        search_response: ApplicantSearchResponse = self._test_response_is_valid(
+            response
+        )
         for applicant in search_response.bewerber:
             self.assertIsNotNone(applicant.arbeitszeitModelle)
             if applicant.arbeitszeitModelle is not None:
                 self.assertGreater(len(applicant.arbeitszeitModelle), 0)
                 if working_time != WorkingTime.UNDEFINED.value:
-                    self.assertIn(working_time, [arbeitszeit.value for arbeitszeit in applicant.arbeitszeitModelle])
+                    self.assertIn(
+                        working_time,
+                        [
+                            arbeitszeit.value
+                            for arbeitszeit in applicant.arbeitszeitModelle
+                        ],
+                    )
 
     @parameterized.expand(SEARCH_KEYWORDS)
     def test_parameter_keyword(self, keyword: Text):
-        params: Dict = {
-            "searchKeyword": keyword
-        }
+        params: Dict = {"searchKeyword": keyword}
         response = self.client.get(self.API_PATH, params=params)
-        search_response: ApplicantSearchResponse = self._test_response_is_valid(response)
+        search_response: ApplicantSearchResponse = self._test_response_is_valid(
+            response
+        )
         for applicant in search_response.bewerber:
             self.assertRegexInDeep(applicant.__dict__, keyword)
 
@@ -124,7 +148,9 @@ class TestSearchApplicants(unittest.TestCase):
     #             if applicant.arbeitszeitModelle is not None:
     #                 self.assertIn(working_time.value, [arbeitszeit.value for arbeitszeit in applicant.arbeitszeitModelle])
 
-    def assertRegexInDeep(self, obj: Dict[Text, Any], regex: Text, msg: Optional[Text] = None):
+    def assertRegexInDeep(
+        self, obj: Dict[Text, Any], regex: Text, msg: Optional[Text] = None
+    ):
         if msg is None:
             msg = f"Regex {regex} not found in {obj}"
 

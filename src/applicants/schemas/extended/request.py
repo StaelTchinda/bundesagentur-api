@@ -3,7 +3,16 @@ from fastapi import Query
 from pydantic import BaseModel
 
 from src.applicants.schemas.arbeitsagentur.request import SearchParameters
-from src.applicants.schemas.arbeitsagentur.enums import ContractType, Disability, EducationType, InputWorkingTime, LocationRadius, OfferType, WorkExperience, WorkingTime
+from src.applicants.schemas.arbeitsagentur.enums import (
+    ContractType,
+    Disability,
+    EducationType,
+    InputWorkingTime,
+    LocationRadius,
+    OfferType,
+    WorkExperience,
+    WorkingTime,
+)
 
 
 class FetchParameters(BaseModel):
@@ -23,7 +32,7 @@ class FetchParameters(BaseModel):
     locations: Optional[List[Text]] = None
 
     def get_original_search_params(self) -> Iterable[SearchParameters]:
-        for page_idx in range(self.pages_start, self.pages_start+self.pages_count):
+        for page_idx in range(self.pages_start, self.pages_start + self.pages_count):
             params: SearchParameters = SearchParameters(
                 searchKeyword=self.searchKeyword,
                 educationType=self.educationType,
@@ -36,13 +45,13 @@ class FetchParameters(BaseModel):
                 disability=self.disability,
                 page=page_idx,
                 size=self.size,
-                locations=self.locations
+                locations=self.locations,
             )
             yield params
 
 
 class FetchApplicantsDetailsRequest(BaseModel):
-    applicantIds : List[Text]
+    applicantIds: List[Text]
 
 
 class ExtendedSearchParameters(BaseModel):
@@ -56,12 +65,12 @@ class ExtendedSearchParameters(BaseModel):
 
 
 class ExtendedDetailedSearchParameters(BaseModel):
-   job_title : Optional[Text] = None
-   location : Optional[Text] = None
-   min_avg_job_position_years : Optional[int] = None
-   min_work_experience_years : Optional[int] = None
-   max_sabbatical_time_years : Optional[int] = None
-   job_keywords : Optional[List[Text]] = None
-   education_keyword : Optional[Text] = None
-   skills : Optional[List[Text]] = None
-   languages : Optional[List[Text]] = None
+    job_title: Optional[Text] = None
+    location: Optional[Text] = None
+    min_avg_job_position_years: Optional[int] = None
+    min_work_experience_years: Optional[int] = None
+    max_sabbatical_time_years: Optional[int] = None
+    job_keywords: Optional[List[Text]] = None
+    education_keyword: Optional[Text] = None
+    skills: Optional[List[Text]] = None
+    languages: Optional[List[Text]] = None

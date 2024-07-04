@@ -8,8 +8,10 @@ class ParamEnum(Enum):
         self._param_value_ = param_value
 
     @classmethod
-    def __flex_init__(cls, value_or_param_value, param_value = None) -> 'ParamEnum':
-        compare_nullable: Callable[[Any, Any], bool] = lambda a, b: a == b or (a is None and b is None)
+    def __flex_init__(cls, value_or_param_value, param_value=None) -> "ParamEnum":
+        compare_nullable: Callable[[Any, Any], bool] = lambda a, b: a == b or (
+            a is None and b is None
+        )
 
         _value_ = None
         _param_value_ = None
@@ -18,21 +20,24 @@ class ParamEnum(Enum):
             _param_value_ = param_value
         else:
             for enum_entity in cls:
-                if compare_nullable(enum_entity.value, value_or_param_value) \
-                        or compare_nullable(enum_entity.param_value, value_or_param_value):
+                if compare_nullable(
+                    enum_entity.value, value_or_param_value
+                ) or compare_nullable(enum_entity.param_value, value_or_param_value):
                     _value_ = enum_entity.value
                     _param_value_ = enum_entity.param_value
-        
+
         try:
             enum_value = cls(_value_, _param_value_)
         except Exception as e:
-            raise ValueError(f"Could not instantiate enum {cls.__name__} with parameters ({value_or_param_value}, {param_value}): {e}")
+            raise ValueError(
+                f"Could not instantiate enum {cls.__name__} with parameters ({value_or_param_value}, {param_value}): {e}"
+            )
 
         return enum_value
 
     @classmethod
     def _missing_(cls, value):
-        return cls.__flex_init__(value)     
+        return cls.__flex_init__(value)
 
     @property
     def value(self):
@@ -108,7 +113,10 @@ class ContractType(ParamEnum):
 
 
 class Disability(ParamEnum):
-    ONLY_SEVERELY_DISABLED = "Nur Schwerbehinderte oder ihnen gleichgestellte Bewerber*innen anzeigen", 1
+    ONLY_SEVERELY_DISABLED = (
+        "Nur Schwerbehinderte oder ihnen gleichgestellte Bewerber*innen anzeigen",
+        1,
+    )
     ALL = "Alle Bewerber*innen anzeigen", 2
     UNDEFINED = "", None
 
@@ -117,4 +125,3 @@ class JobType(ParamEnum):
     ARBEIT = "Arbeit", "ARBEIT"
     UNDEFINED = "", None
     # TODO: Add other job types
-

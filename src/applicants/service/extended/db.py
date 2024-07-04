@@ -8,10 +8,14 @@ from tinydb.queries import QueryLike
 from tinydb.table import Document
 
 from src.applicants.schemas.arbeitsagentur.enums import *
-from src.applicants.schemas.arbeitsagentur.schemas import BewerberUebersicht, BewerberDetail
+from src.applicants.schemas.arbeitsagentur.schemas import (
+    BewerberUebersicht,
+    BewerberDetail,
+)
 
 
 PathLike = Union[Path, Text]
+
 
 class DetailedApplicantsDb:
     def __init__(self, db_path: PathLike = "data/db/applicants_detail.json"):
@@ -26,9 +30,11 @@ class DetailedApplicantsDb:
 
     def get(self, query: QueryLike) -> List[BewerberDetail]:
         docs: List[Document] = self.db.search(query)
-        applicants: List[BewerberDetail] = [self._unserealize_object_(doc) for doc in docs]
+        applicants: List[BewerberDetail] = [
+            self._unserealize_object_(doc) for doc in docs
+        ]
         return applicants
-    
+
     def get_by_refnr(self, refnr: Text) -> Optional[BewerberDetail]:
         doc: Optional[Document | List[Document]] = self.db.get(Query().refnr == refnr)
         if doc is None:
@@ -41,10 +47,10 @@ class DetailedApplicantsDb:
         applicant_json = json.dumps(applicant.__dict__, default=default_json_dumps)
         applicant_serializable_dict = json.loads(applicant_json)
         return applicant_serializable_dict
-    
+
     def _unserealize_object_(self, applicant_dict: Dict) -> BewerberDetail:
         return BewerberDetail(**applicant_dict)
-    
+
     def upsert(self, applicant: BewerberDetail):
         query = Query()
         if self.db.contains(query.refnr == applicant.refnr):
@@ -55,7 +61,9 @@ class DetailedApplicantsDb:
 
     def get_all(self) -> List[BewerberDetail]:
         docs: List[Document] = self.db.all()
-        applicants: List[BewerberDetail] = [self._unserealize_object_(doc) for doc in docs]
+        applicants: List[BewerberDetail] = [
+            self._unserealize_object_(doc) for doc in docs
+        ]
         return applicants
 
 
@@ -77,20 +85,26 @@ class SearchedApplicantsDb:
         elif isinstance(doc, list):
             return BewerberUebersicht(**doc[0])
         return BewerberUebersicht(**doc)
-    
+
     def get_by_refnrs(self, refnrs: List[Text]) -> List[BewerberUebersicht]:
         docs: List[Document] = self.db.search(Query().refnr.test(lambda x: x in refnrs))
-        applicants: List[BewerberUebersicht] = [self._unserealize_object_(doc) for doc in docs]
+        applicants: List[BewerberUebersicht] = [
+            self._unserealize_object_(doc) for doc in docs
+        ]
         return applicants
 
     def get(self, query: QueryLike) -> List[BewerberUebersicht]:
         docs: List[Document] = self.db.search(query)
-        applicants: List[BewerberUebersicht] = [self._unserealize_object_(doc) for doc in docs]
+        applicants: List[BewerberUebersicht] = [
+            self._unserealize_object_(doc) for doc in docs
+        ]
         return applicants
 
     def get_all(self) -> List[BewerberUebersicht]:
         docs: List[Document] = self.db.all()
-        applicants: List[BewerberUebersicht] = [self._unserealize_object_(doc) for doc in docs]
+        applicants: List[BewerberUebersicht] = [
+            self._unserealize_object_(doc) for doc in docs
+        ]
         return applicants
 
     def update(self, query: QueryLike, data) -> None:
@@ -120,7 +134,7 @@ class SearchedApplicantsDb:
         applicant_json = json.dumps(applicant.__dict__, default=default_json_dumps)
         applicant_serializable_dict = json.loads(applicant_json)
         return applicant_serializable_dict
-    
+
     def _unserealize_object_(self, applicant_dict: Dict) -> BewerberUebersicht:
         return BewerberUebersicht(**applicant_dict)
 
