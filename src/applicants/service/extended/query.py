@@ -18,10 +18,14 @@ logging.basicConfig(**DEFAULT_LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
 
 def search_re_keyword(field: Union[Query, str], keyword: Text) -> QueryInstance:
-  if isinstance(field, str):
-    return Query().__getattr__(field).search(f".*{keyword}.*", re.IGNORECASE)
+  query: Query
+  if isinstance(field, Query):
+    query = field
+  elif isinstance(field, str):
+    query = Query().__getattr__(field)
   else:
-    return field.search(f".*{keyword}.*", re.IGNORECASE)
+    raise ValueError(f"Invalid field type: {type(field)}")
+  return query.matches(f"{keyword}", re.IGNORECASE)
 
 
 def build_search_query(search_parameters: ExtendedSearchParameters) -> Optional[QueryInstance]:

@@ -105,12 +105,37 @@ class TimePeriod(str):
         """
         time_period = self.get_time_dict()
         return time_period['years'] * 365 + time_period['months'] * 30 + time_period['days']
+    
+
+    @classmethod
+    def from_time(cls, time: int) -> str:
+        """This function creates a TimePeriod object from a time period in days.
+
+        Args:
+            time (int): The time period in days.
+
+        Returns:
+            str: The TimePeriod object.
+        """
+        years: int = time // 365
+        time %= 365
+        months: int = time // 30
+        time %= 30
+        days: int = time
+        return TimePeriod(f"P{years}Y{months}M{days}D")
 
 
     def __lt__(self, value: str) -> bool:
         if not isinstance(value, TimePeriod):
             raise ValueError(f"Cannot compare TimePeriod with {type(value)}")
         return self.get_time() < value.get_time()
+    
+    # Create function to sum two TimePeriods
+    def __add__(self, value: str) -> str:
+        if not isinstance(value, TimePeriod):
+            raise ValueError(f"Cannot add TimePeriod with {type(value)}")
+        time_period: int = self.get_time() + value.get_time()
+        return TimePeriod.from_time(time_period)
 
 
 class BerufsfeldErfahrung(BaseModel):
