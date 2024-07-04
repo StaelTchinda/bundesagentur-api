@@ -405,7 +405,6 @@ def build_detailed_search_query(
         _applicant = Query()
 
         def max_sabbatical_time_check(werdegang: list[LebenslaufElement]) -> bool:
-        def max_sabbatical_time_check(werdegang: list[LebenslaufElement]) -> bool:
 
             if werdegang is not None:
                 sabbatical_time = timedelta(0)
@@ -479,6 +478,8 @@ def build_detailed_search_query(
                 | (
                     _applicant.erfahrung.exists()
                     & _applicant.erfahrung.berufsfeldErfahrung.exists()
+                )
+            )
     if search_parameters.job_keywords:
         logger.info(f"Searching for job keywords: {search_parameters.job_keywords}")
         # Search over "werdegang", "berufe", and "erfahrung"
@@ -515,17 +516,13 @@ def build_detailed_search_query(
             if query is None:
                 query = subquery
             else:
-                query &= subquery
-                    )
-                )
-                | (
+                query &= subquery | (
                     _applicant.werdegang.exists()
                     & _applicant.werdegang.any(
                         search_re_keyword(_career.berufsbezeichnung, keyword)
                         | search_re_keyword(_career.beschreibung, keyword)
                     )
                 )
-            )
 
             if query is None:
                 query = subquery

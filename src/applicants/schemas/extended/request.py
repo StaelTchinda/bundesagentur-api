@@ -43,7 +43,6 @@ class FetchParameters(BaseModel):
 
     def get_original_search_params(self) -> Iterable[SearchParameters]:
         for page_idx in range(self.pages_start, self.pages_start + self.pages_count):
-        for page_idx in range(self.pages_start, self.pages_start + self.pages_count):
             params: SearchParameters = SearchParameters(
                 searchKeyword=self.searchKeyword,
                 educationType=self.educationType,

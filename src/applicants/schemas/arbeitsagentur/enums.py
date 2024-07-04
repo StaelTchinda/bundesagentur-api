@@ -118,10 +118,6 @@ class Disability(ParamEnum):
         "Nur Schwerbehinderte oder ihnen gleichgestellte Bewerber*innen anzeigen",
         1,
     )
-    ONLY_SEVERELY_DISABLED = (
-        "Nur Schwerbehinderte oder ihnen gleichgestellte Bewerber*innen anzeigen",
-        1,
-    )
     ALL = "Alle Bewerber*innen anzeigen", 2
     UNDEFINED = "", None
 

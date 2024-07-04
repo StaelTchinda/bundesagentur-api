@@ -117,41 +117,40 @@ def fetch_applicants(params: Annotated[Dict, Depends(FetchParameters)]):
     for page_idx, search_parameters in enumerate(
         extended_search_params.get_original_search_params()
     ):
-    page_start: int = (
-        extended_search_params.pages_start
-        if extended_search_params.pages_start is not None
-        else 0
-    )
-    for page_idx, search_parameters in enumerate(
-        extended_search_params.get_original_search_params()
-    ):
-        search_result_dict: Dict = api.search_applicants(search_parameters)
-        logger.info(
-            f"Fetching resumes from page {page_start + page_idx + 1} with keys: {search_result_dict.keys()}"
-        )
-        logger.info(
-            f"Fetching resumes from page {page_start + page_idx + 1} with keys: {search_result_dict.keys()}"
-        )
-        if "messages" in search_result_dict:
-            logger.warning(
-                f"Error while fetching resumes: {search_result_dict['messages']}"
+        page_start: int = 0
+        if extended_search_params.pages_start is not None:
+            page_start = extended_search_params.pages_start
+
+        for page_idx, search_parameters in enumerate(
+            extended_search_params.get_original_search_params()
+        ):
+            search_result_dict: Dict = api.search_applicants(search_parameters)
+            logger.info(
+                f"Fetching resumes from page {page_start + page_idx + 1} with keys: {search_result_dict.keys()}"
             )
-            logger.warning(
-                f"Error while fetching resumes: {search_result_dict['messages']}"
+            logger.info(
+                f"Fetching resumes from page {page_start + page_idx + 1} with keys: {search_result_dict.keys()}"
             )
-            raise HTTPException(status_code=400, detail=search_result_dict["messages"])
-        elif "bewerber" not in search_result_dict:
-            logger.warning(f"No applicants found on page {page_start + page_idx + 1}")
-            break
-        search_result: ApplicantSearchResponse = ApplicantSearchResponse(
-            **search_result_dict
-        )
-        search_result: ApplicantSearchResponse = ApplicantSearchResponse(
-            **search_result_dict
-        )
-        for applicant in search_result.bewerber:
-            db.upsert(applicant)
-            searched_applicants_refnrs.append(applicant.refnr)
+            if "messages" in search_result_dict:
+                logger.warning(
+                    f"Error while fetching resumes: {search_result_dict['messages']}"
+                )
+                logger.warning(
+                    f"Error while fetching resumes: {search_result_dict['messages']}"
+                )
+                raise HTTPException(status_code=400, detail=search_result_dict["messages"])
+            elif "bewerber" not in search_result_dict:
+                logger.warning(f"No applicants found on page {page_start + page_idx + 1}")
+                break
+            search_result: ApplicantSearchResponse = ApplicantSearchResponse(
+                **search_result_dict
+            )
+            search_result: ApplicantSearchResponse = ApplicantSearchResponse(
+                **search_result_dict
+            )
+            for applicant in search_result.bewerber:
+                db.upsert(applicant)
+                searched_applicants_refnrs.append(applicant.refnr)
 
 
     response = {
@@ -289,8 +288,7 @@ def search_applicant_details(
         job_keywords=jobKeywords,
         education_keyword=educationKeyword,
         skills=skills,
-        languages=languages,
-        languages=languages,
+        languages=languages
     )
 
     query = build_detailed_search_query(search_parameters)
@@ -331,7 +329,6 @@ def search_applicant_details(
 
 
 @router.post("/applicants/suggest_criteria", response_model=SearchCriteriaSuggestion)
-def suggest_criteria(job_description: Text = Query()):
 def suggest_criteria(job_description: Text = Query()):
     query = build_knowledge_search_query(job_description)
     logger.info(f"Query: {query}")
