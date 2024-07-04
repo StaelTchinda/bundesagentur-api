@@ -29,5 +29,3 @@ def get_applicant(applicant_id: Text):
     api.init()
     applicant = api.get_applicant(applicant_id)
     return applicant
-
-

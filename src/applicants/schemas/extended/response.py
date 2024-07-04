@@ -2,7 +2,10 @@ from typing import List, Optional, Text
 
 from pydantic import BaseModel
 
-from src.applicants.schemas.arbeitsagentur.schemas import BewerberUebersicht, BewerberDetail
+from src.applicants.schemas.arbeitsagentur.schemas import (
+    BewerberUebersicht,
+    BewerberDetail,
+)
 
 
 class FetchDetailedApplicantsResponse(BaseModel):

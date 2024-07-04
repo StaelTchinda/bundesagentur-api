@@ -1,7 +1,16 @@
 from typing import Optional, Text, Dict
 from pydantic import BaseModel
 from fastapi import Query
-from src.applicants.schemas.arbeitsagentur.enums import EducationType, InputWorkingTime, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
+from src.applicants.schemas.arbeitsagentur.enums import (
+    EducationType,
+    InputWorkingTime,
+    LocationRadius,
+    OfferType,
+    WorkingTime,
+    WorkExperience,
+    ContractType,
+    Disability,
+)
 
 
 class SearchParameters(BaseModel):
@@ -29,6 +38,5 @@ SEARCH_PARAMETERS_TO_GET_PARAMS: Dict[Text, Text] = {
     "contractType": "vertragsart",
     "disability": "behinderung",
     "page": "page",
-    "size": "size"
+    "size": "size",
 }
-
