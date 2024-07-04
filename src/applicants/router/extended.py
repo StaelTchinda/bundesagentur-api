@@ -198,7 +198,6 @@ def search_applicants(
     logger.info(f"Found in total {total_count} applicants")
 
     applicants = applicants[(page - 1) * size : (page - 1) * size + size]
-    applicants = applicants[(page - 1) * size : (page - 1) * size + size]
 
     response = {
         "maxCount": total_count,
