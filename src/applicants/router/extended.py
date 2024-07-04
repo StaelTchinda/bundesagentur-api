@@ -49,10 +49,9 @@ def fetch_applicants(params: Annotated[Dict, Depends(FetchParameters)]):
             db.upsert(applicant)
             searched_applicants_refnrs.append(applicant.refnr)
     
-    applicants: List[BewerberUebersicht] = db.get_by_refnrs(searched_applicants_refnrs)
     response = {
-        "count": len(applicants),
-        "applicantRefnrs": [applicant.refnr for applicant in applicants]
+        "count": len(searched_applicants_refnrs),
+        "applicantRefnrs": searched_applicants_refnrs
     }
 
     return response
