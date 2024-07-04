@@ -49,10 +49,9 @@ def fetch_applicants(params: Annotated[Dict, Depends(FetchParameters)]):
             db.upsert(applicant)
             searched_applicants_refnrs.append(applicant.refnr)
     
-    applicants: List[BewerberUebersicht] = db.get_by_refnrs(searched_applicants_refnrs)
     response = {
-        "count": len(applicants),
-        "applicantRefnrs": [applicant.refnr for applicant in applicants]
+        "count": len(searched_applicants_refnrs),
+        "applicantRefnrs": searched_applicants_refnrs
     }
 
     return response
@@ -66,6 +65,7 @@ def search_applicants(
     careerField: Text = Query(None),
     workingTime: WorkingTime = WorkingTime.UNDEFINED,
     locationKeyword: Text = Query(None),
+    locationRadius: int = Query(None),
 
     page: int = 1,
     size: int = 25,
@@ -76,7 +76,8 @@ def search_applicants(
         min_work_experience_years=minWorkExperienceYears,
         career_field=careerField,
         working_time=workingTime,
-        location_keyword=locationKeyword
+        location_keyword=locationKeyword,
+        location_radius=locationRadius
     )
 
     query = build_search_query(search_parameters)
