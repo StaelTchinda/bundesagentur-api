@@ -38,7 +38,6 @@ class ParamEnum(Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.__flex_init__(value)
-        return cls.__flex_init__(value)
 
     @property
     def value(self):
