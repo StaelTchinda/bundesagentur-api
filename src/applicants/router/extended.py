@@ -149,7 +149,7 @@ def search_applicants(
     careerField: Text = Query(None),
     workingTime: WorkingTime = WorkingTime.UNDEFINED,
     locationKeyword: Text = Query(None),
-    locationRadius: int = Query(None),
+    locationRadius: int = 0,
     page: int = 1,
     size: int = 25,
 ):
