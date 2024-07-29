@@ -13,16 +13,6 @@ from src.applicants.schemas.arbeitsagentur.enums import (
     WorkExperience,
     WorkingTime,
 )
-from src.applicants.schemas.arbeitsagentur.enums import (
-    ContractType,
-    Disability,
-    EducationType,
-    InputWorkingTime,
-    LocationRadius,
-    OfferType,
-    WorkExperience,
-    WorkingTime,
-)
 
 
 class FetchParameters(BaseModel):
