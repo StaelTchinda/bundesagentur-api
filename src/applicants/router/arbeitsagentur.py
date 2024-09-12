@@ -2,6 +2,7 @@ from typing import Dict, List, Text
 from fastapi import APIRouter
 import logging
 
+from src.applicants.schemas.arbeitsagentur.enums import ContractType, Disability, EducationType, LocationRadius, OfferType, WorkExperience, WorkingTime
 from src.applicants.schemas.arbeitsagentur.response import ApplicantSearchResponse
 from src.applicants.schemas.arbeitsagentur.schemas import BewerberDetail
 from src.applicants.schemas.arbeitsagentur.request import SearchParameters
