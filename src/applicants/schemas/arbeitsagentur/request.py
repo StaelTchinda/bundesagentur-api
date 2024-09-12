@@ -30,7 +30,7 @@ class SearchParameters(BaseModel):
     # accessibility: Union[Accessibiltiy, None] # Params values: E-Mail;Telefon;Post
 
     # Filter criteria with text values
-    locations: Optional[List[Text]] = Query(None)
+    # locations: Optional[List[Text]] = Query(None)
     # occupationalFields: Optional[List[Text]] = Query(None)
     # occupations: Optional[List[Text]] = Query(None)
     # ...
