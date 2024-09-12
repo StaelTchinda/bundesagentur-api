@@ -25,13 +25,6 @@ class ApplicantApi:
         pass
 
     def init(self):
-        logger.info("Initializing the API")
-        response = requests.post(self.token_url, data=self.auth)
-        logger.info(f"Received response with status code {response.status_code}")
-        self.token = response.json().get("access_token")
-        if self.token is None:
-            logger.error(f"No token received. Response: {response.json()}")
-            raise Exception("No token received")
         pass
 
     def search_applicants(
