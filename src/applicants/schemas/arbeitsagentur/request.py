@@ -1,4 +1,4 @@
-from typing import Optional, Text, Dict
+from typing import List, Union, Text, Dict
 from pydantic import BaseModel
 from fastapi import Query
 from src.applicants.schemas.arbeitsagentur.enums import (
@@ -14,18 +14,25 @@ from src.applicants.schemas.arbeitsagentur.enums import (
 
 
 class SearchParameters(BaseModel):
-    searchKeyword: Optional[Text] = Query(None)
-    educationType: EducationType = EducationType.UNDEFINED
-    locationKeyword: Optional[Text] = Query(None)
-    locationRadius: LocationRadius = LocationRadius.ZERO
-    offerType: OfferType = OfferType.WORKER
-    workingTime: InputWorkingTime = InputWorkingTime.UNDEFINED
-    workExperience: WorkExperience = WorkExperience.WITH_EXPERIENCE
-    contractType: ContractType = ContractType.UNDEFINED
-    disability: Disability = Disability.UNDEFINED
-    page: int = 1
-    size: int = 25
+    searchKeyword: Union[Text, None]
+    educationType: Union[EducationType, None]
+    locationKeyword: Union[Text, None]
+    locationRadius: Union[LocationRadius, None]
+    offerType: Union[OfferType, None]
+    workingTime: Union[WorkingTime, None]
+    workExperience: Union[WorkExperience, None]
+    contractType: Union[ContractType, None]
+    disability: Union[Disability, None]
+    page: Union[int, None]
+    size: Union[int, None]
+    # publicationDateAge: Union[int, None] # Acceptable values: 1, 7, 14, 28
+    # accessibility: Union[Accessibiltiy, None] # Params values: E-Mail;Telefon;Post
 
+    # Filter criteria with text values
+    locations: Union[List[Text], None]
+    # occupationalFields: Union[List[Text], None]
+    # occupations: Union[List[Text], None]
+    # ...
 
 SEARCH_PARAMETERS_TO_GET_PARAMS: Dict[Text, Text] = {
     "searchKeyword": "was",
@@ -39,4 +46,6 @@ SEARCH_PARAMETERS_TO_GET_PARAMS: Dict[Text, Text] = {
     "disability": "behinderung",
     "page": "page",
     "size": "size",
+
+    "locations": "arbeitsorte",
 }

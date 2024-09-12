@@ -1,7 +1,8 @@
-from typing import Annotated, Dict, Text
-from fastapi import APIRouter, Depends
+from typing import Dict, List, Text
+from fastapi import APIRouter
 import logging
 
+from src.applicants.schemas.arbeitsagentur.enums import ContractType, Disability, EducationType, LocationRadius, OfferType, WorkExperience, WorkingTime
 from src.applicants.schemas.arbeitsagentur.response import ApplicantSearchResponse
 from src.applicants.schemas.arbeitsagentur.schemas import BewerberDetail
 from src.applicants.schemas.arbeitsagentur.request import SearchParameters
@@ -15,8 +16,36 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("/applicants/arbeitsagentur/search", response_model=ApplicantSearchResponse)
-def search_applicants(props: Annotated[Dict, Depends(SearchParameters)]):
-    search_parameters = SearchParameters(**props.__dict__)
+def search_applicants(
+    searchKeyword: Text | None = None,
+    educationType: EducationType = EducationType.UNDEFINED,
+    locationKeyword: Text | None = None,
+    locationRadius: LocationRadius = LocationRadius.ZERO,
+    offerType: OfferType = OfferType.WORKER,
+    workingTime: WorkingTime = WorkingTime.UNDEFINED,
+    workExperience: WorkExperience = WorkExperience.WITH_EXPERIENCE,
+    contractType: ContractType = ContractType.UNDEFINED,
+    disability: Disability = Disability.UNDEFINED,
+    page: int = 1,
+    size: int = 25,
+    # Further filter options
+    locations: List[Text] = [],
+):
+    search_parameters = SearchParameters(
+        searchKeyword=searchKeyword,
+        educationType=educationType,
+        locationKeyword=locationKeyword,
+        locationRadius=locationRadius,
+        offerType=offerType,
+        workingTime=workingTime,
+        workExperience=workExperience,
+        contractType=contractType,
+        disability=disability,
+        page=page,
+        size=size,
+        # Further filter options
+        locations=locations
+    )
     api = ApplicantApi()
     api.init()
     search_result_dict: Dict = api.search_applicants(search_parameters)

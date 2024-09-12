@@ -62,23 +62,46 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("/applicants/fetch", response_model=FetchApplicantsResponse)
-def fetch_applicants(params: Annotated[Dict, Depends(FetchParameters)]):
+def fetch_applicants(
+    searchKeyword: Text | None = None,
+    educationType: EducationType = EducationType.UNDEFINED,
+    locationKeyword: Text | None = None,
+    locationRadius: LocationRadius = LocationRadius.ZERO,
+    offerType: OfferType = OfferType.WORKER,
+    workingTime: WorkingTime = WorkingTime.UNDEFINED,
+    workExperience: WorkExperience = WorkExperience.WITH_EXPERIENCE,
+    contractType: ContractType = ContractType.UNDEFINED,
+    disability: Disability = Disability.UNDEFINED,
+    pages_count: int = 1,
+    pages_start: Optional[int] = None,
+    size: int = 25,
+    # Further filter options
+    locations: List[Text] = [],
+):
     api = ApplicantApi()
     api.init()
     db = SearchedApplicantsDb()
     searched_applicants_refnrs = []
-    extended_search_params: FetchParameters = FetchParameters(**params.__dict__)
-    page_start: int = (
-        extended_search_params.pages_start
-        if extended_search_params.pages_start is not None
-        else 0
-    )
-    for page_idx, search_parameters in enumerate(
-        extended_search_params.get_original_search_params()
-    ):
+    start = pages_start or 0
+    for page_idx in range(start, start+pages_count):
+        search_parameters = SearchParameters(
+            searchKeyword=searchKeyword,
+            educationType=educationType,
+            locationKeyword=locationKeyword,
+            locationRadius=locationRadius,
+            offerType=offerType,
+            workingTime=workingTime,
+            workExperience=workExperience,
+            contractType=contractType,
+            disability=disability,
+            page=page_idx + 1,
+            size=size,
+            # Further filter options
+            locations=locations
+        )
         search_result_dict: Dict = api.search_applicants(search_parameters)
         logger.info(
-            f"Fetching resumes from page {page_start + page_idx + 1} with keys: {search_result_dict.keys()}"
+            f"Fetching resumes from page {pages_start + page_idx + 1} with keys: {search_result_dict.keys()}"
         )
         if "messages" in search_result_dict:
             logger.warning(

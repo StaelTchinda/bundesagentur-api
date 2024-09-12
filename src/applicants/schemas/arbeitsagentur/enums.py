@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any, Callable
 
 
 class ParamEnum(Enum):
@@ -7,7 +8,9 @@ class ParamEnum(Enum):
         self._param_value_ = param_value
 
     @classmethod
-    def __flex_init__(cls, value_or_param_value, param_value=None) -> "ParamEnum":
+    def __flex_init__(cls, value_or_param_value, param_value = None) -> 'ParamEnum':
+        compare_nullable: Callable[[Any, Any], bool] = lambda a, b: a == b or (a is None and b is None)
+
         _value_ = None
         _param_value_ = None
         if param_value is not None:
@@ -15,18 +18,16 @@ class ParamEnum(Enum):
             _param_value_ = param_value
         else:
             for enum_entity in cls:
-                if (
-                    enum_entity.value == value_or_param_value
-                    or enum_entity.param_value == value_or_param_value
-                ):
+                if compare_nullable(enum_entity.value, value_or_param_value) \
+                        or compare_nullable(enum_entity.param_value, value_or_param_value):
                     _value_ = enum_entity.value
                     _param_value_ = enum_entity.param_value
-        if _value_ is None or _param_value_ is None:
-            raise ValueError(
-                f"Invalid parameters for class {cls.__name__}: {value_or_param_value}, {param_value}"
-            )
+        
+        try:
+            enum_value = cls(_value_, _param_value_)
+        except Exception as e:
+            raise ValueError(f"Could not instantiate enum {cls.__name__} with parameters ({value_or_param_value}, {param_value}): {e}")
 
-        enum_value = cls(_value_, _param_value_)
         return enum_value
 
     @classmethod
