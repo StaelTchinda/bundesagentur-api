@@ -19,20 +19,13 @@ class ApplicantApi:
     )
     api_search_url: Text = f"{api_base_url}/bewerber"
     api_detail_url: Text = f"{api_base_url}/bewerberdetails"
-    # token_url: Text = "https://rest.arbeitsagentur.de/oauth/gettoken_cc"
-    # auth: Dict[Text, Text] = {
-    #     "client_id": "jobboerse-bewerbersuche-ui"
-    # }
     api_key: Text = "jobboerse-bewerbersuche-ui"
 
     def __init__(self):
-        self.token: Optional[Text] = None
         pass
 
     def init(self):
         pass
-        # response = requests.post(self.token_url, data=self.auth)
-        # self.token = response.json().get("access_token")
 
     def search_applicants(
         self, search_parameters: Optional[SearchParameters] = None
@@ -55,7 +48,7 @@ class ApplicantApi:
         )
         response = requests.get(
             self.api_search_url,
-            headers={"X-API-Key": self.api_key},
+            headers=self.get_headers(),
             params=request_params,
         )
         logger.info(
@@ -65,5 +58,8 @@ class ApplicantApi:
 
     def get_applicant(self, applicant_id: Text) -> Dict:
         api_url = f"{self.api_detail_url}/{applicant_id}"
-        response = requests.get(api_url, headers={"X-API-Key": self.api_key})
+        response = requests.get(api_url, headers=self.get_headers())
         return response.json()
+
+    def get_headers(self):
+        return {"X-API-Key": self.api_key}
