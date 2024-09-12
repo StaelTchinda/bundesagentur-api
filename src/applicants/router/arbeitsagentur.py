@@ -3,7 +3,6 @@ from fastapi import APIRouter
 import logging
 
 from src.applicants.schemas.arbeitsagentur.response import ApplicantSearchResponse
-from src.applicants.schemas.arbeitsagentur.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
 from src.applicants.schemas.arbeitsagentur.schemas import BewerberDetail
 from src.applicants.schemas.arbeitsagentur.request import SearchParameters
 from src.applicants.service.arbeitsagentur import ApplicantApi
@@ -58,5 +57,3 @@ def get_applicant(applicant_id: Text):
     api.init()
     applicant = api.get_applicant(applicant_id)
     return applicant
-
-

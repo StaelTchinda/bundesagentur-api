@@ -32,7 +32,7 @@ class ParamEnum(Enum):
 
     @classmethod
     def _missing_(cls, value):
-        return cls.__flex_init__(value)     
+        return cls.__flex_init__(value)
 
     @property
     def value(self):
@@ -77,6 +77,15 @@ class OfferType(ParamEnum):
     UNDEFINED = "", None
 
 
+class InputWorkingTime(ParamEnum):
+    FULL_TIME = "Vollzeit", "vz"
+    PART_TIME = "Teilzeit", "tz"
+    SHIFT_NIGHT_WEEKEND = "Schicht,Nacht,Wochenende", "snw"
+    HOME_TELEWORK = "Heim-/Telearbeit", "ho"
+    MINI_JOB = "Minijob", "mj"
+    UNDEFINED = "", None
+
+
 class WorkingTime(ParamEnum):
     FULL_TIME = "Vollzeit", "VOLLZEIT"
     PART_TIME = "Teilzeit", "TEILZEIT"
@@ -99,7 +108,10 @@ class ContractType(ParamEnum):
 
 
 class Disability(ParamEnum):
-    ONLY_SEVERELY_DISABLED = "Nur Schwerbehinderte oder ihnen gleichgestellte Bewerber*innen anzeigen", 1
+    ONLY_SEVERELY_DISABLED = (
+        "Nur Schwerbehinderte oder ihnen gleichgestellte Bewerber*innen anzeigen",
+        1,
+    )
     ALL = "Alle Bewerber*innen anzeigen", 2
     UNDEFINED = "", None
 
@@ -108,4 +120,3 @@ class JobType(ParamEnum):
     ARBEIT = "Arbeit", "ARBEIT"
     UNDEFINED = "", None
     # TODO: Add other job types
-

@@ -42,3 +42,11 @@ Since one benefit of this project is the ability to work with local data, it is 
 ```
 python -m scripts.search_and_fetch_details --max_graduation_year 2000 --location_keyword "München" --pages_count 10 --skip-existing
 ```
+
+### Testing
+
+To test the application, please run the command:
+
+```
+python -m unittest discover tests
+```

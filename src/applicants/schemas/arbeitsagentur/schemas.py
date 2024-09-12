@@ -10,8 +10,9 @@ from src.applicants.schemas.arbeitsagentur.enums import JobType, WorkingTime
 
 # TODO: better represent optional fields
 
+
 class TimePeriod(str):
-    """ This class is used to represent a time period in the format used by the Arbeitsagentur API.
+    """This class is used to represent a time period in the format used by the Arbeitsagentur API.
     It is a string that is in the format PnYnMnD (e.g., P22Y4M23D, P2Y11M23D, P34Y8M24D, etc.)
 
     Args:
@@ -20,14 +21,13 @@ class TimePeriod(str):
 
     @classmethod
     def _regexp_pattern_(cls) -> str:
-        regex = r"P((\d+)Y)?((\d+)M)?((\d+)D)?" # Jonathan
+        regex = r"P((\d+)Y)?((\d+)M)?((\d+)D)?"  # Jonathan
         return regex
 
     def __new__(cls, value: str):
         if not cls.validate(value):
             raise ValueError(f"Invalid time period format: {value}")
         return str.__new__(cls, value)
-
 
     @classmethod
     def validate(cls, value: str) -> bool:
@@ -42,7 +42,6 @@ class TimePeriod(str):
         reg_exp = cls._regexp_pattern_()
         return re.match(reg_exp, value) is not None
 
-
     def get_time_dict(self) -> Dict[Text, int]:
         """This function returns the time period as a dictionary.
 
@@ -53,13 +52,13 @@ class TimePeriod(str):
         search = re.search(regex, self)
         if search is None:
             raise ValueError(f"Invalid time period format: {self}")
-        n_years     = search.group(2)
-        n_months    = search.group(4)
-        n_days      = search.group(6)
+        n_years = search.group(2)
+        n_months = search.group(4)
+        n_days = search.group(6)
         time_period = {
-            'years': 0 if n_years is None else int(n_years),
-            'months': 0 if n_months is None else int(n_months),
-            'days': 0 if n_days is None else int(n_days)
+            "years": 0 if n_years is None else int(n_years),
+            "months": 0 if n_months is None else int(n_months),
+            "days": 0 if n_days is None else int(n_days),
         }
         return time_period
 
@@ -69,7 +68,7 @@ class TimePeriod(str):
         Returns:
             int: The number of years in the time period.
         """
-        return self.get_time_dict()['years']
+        return self.get_time_dict()["years"]
 
     def get_months(self) -> int:
         """This function returns the number of months in the time period.
@@ -77,7 +76,7 @@ class TimePeriod(str):
         Returns:
             int: The number of months in the time period.
         """
-        return self.get_time_dict()['months']
+        return self.get_time_dict()["months"]
 
     def get_days(self) -> int:
         """This function returns the number of days in the time period.
@@ -85,8 +84,7 @@ class TimePeriod(str):
         Returns:
             int: The number of days in the time period.
         """
-        return self.get_time_dict()['days']
-
+        return self.get_time_dict()["days"]
 
     def get_time(self) -> int:
         """This function returns the time period in days.
@@ -95,20 +93,49 @@ class TimePeriod(str):
             int: The time period in days.
         """
         time_period = self.get_time_dict()
-        return time_period['years'] * 365 + time_period['months'] * 30 + time_period['days']
+        return (
+            time_period["years"] * 365
+            + time_period["months"] * 30
+            + time_period["days"]
+        )
 
+    @classmethod
+    def from_time(cls, time: int) -> str:
+        """This function creates a TimePeriod object from a time period in days.
+
+        Args:
+            time (int): The time period in days.
+
+        Returns:
+            str: The TimePeriod object.
+        """
+        years: int = time // 365
+        time %= 365
+        months: int = time // 30
+        time %= 30
+        days: int = time
+        return TimePeriod(f"P{years}Y{months}M{days}D")
 
     def __lt__(self, value: str) -> bool:
         if not isinstance(value, TimePeriod):
             raise ValueError(f"Cannot compare TimePeriod with {type(value)}")
         return self.get_time() < value.get_time()
 
+    # Create function to sum two TimePeriods
+    def __add__(self, value: str) -> str:
+        if not isinstance(value, TimePeriod):
+            raise ValueError(f"Cannot add TimePeriod with {type(value)}")
+        time_period: int = self.get_time() + value.get_time()
+        return TimePeriod.from_time(time_period)
+
 
 class BerufsfeldErfahrung(BaseModel):
     berufsfeld: Text
-    erfahrung: Optional[Text] = None  # This appears to be in an ISO 8601 duration format
+    erfahrung: Optional[Text] = (
+        None  # This appears to be in an ISO 8601 duration format
+    )
 
-    @field_validator('erfahrung')
+    @field_validator("erfahrung")
     def validate_berufsfeld(cls, v):
         if v is not None:
             if not TimePeriod.validate(v):
@@ -120,7 +147,7 @@ class Erfahrung(BaseModel):
     berufsfeldErfahrung: Optional[List[BerufsfeldErfahrung]] = None
     gesamterfahrung: Optional[Text] = None  # ISO 8601 duration format
 
-    @field_validator('gesamterfahrung')
+    @field_validator("gesamterfahrung")
     def validate_berufsfeld(cls, v):
         if v is not None:
             if not TimePeriod.validate(v):
@@ -129,7 +156,7 @@ class Erfahrung(BaseModel):
 
 
 class LetzteTaetigkeit(BaseModel):
-    jahr: Optional[int] = None# TODO: Add validation for year
+    jahr: Optional[int] = None  # TODO: Add validation for year
     bezeichnung: Text
     aktuell: bool
 
@@ -205,8 +232,13 @@ class LebenslaufElement(BaseModel):
 
 
 class Kenntnisse(BaseModel):
-    Expertenkenntnisse: Optional[List[Text]] = Field(validation_alias=AliasChoices('Expertenkenntnisse', 'Verhandlungssicher'), default=None)
-    ErweiterteKenntnisse: Optional[List[Text]] = Field(validation_alias=AliasChoices('Erweiterte Kenntnisse'), default=None)
+    Expertenkenntnisse: Optional[List[Text]] = Field(
+        validation_alias=AliasChoices("Expertenkenntnisse", "Verhandlungssicher"),
+        default=None,
+    )
+    ErweiterteKenntnisse: Optional[List[Text]] = Field(
+        validation_alias=AliasChoices("Erweiterte Kenntnisse"), default=None
+    )
     Grundkenntnisse: Optional[List[Text]] = None
 
 
@@ -231,7 +263,9 @@ class GenericBewerber(BaseModel):
     berufe: List[Text]
     erfahrung: Optional[Erfahrung] = None
     ausbildungen: Optional[List[Ausbildung]] = None
-    freierTitelStellengesuch: Optional[Text] = None  # Optional as not all entries have it
+    freierTitelStellengesuch: Optional[Text] = (
+        None  # Optional as not all entries have it
+    )
 
 
 class BewerberUebersicht(GenericBewerber):
@@ -253,7 +287,7 @@ class BewerberDetail(GenericBewerber):
     lokationen: Optional[List[Lokation]] = None
     werdegang: Optional[List[LebenslaufElement]] = None
     bildung: Optional[List[LebenslaufElement]] = None
-    mobilitaet: Optional[Mobilitaet] = None #not sure what elements are possible here
+    mobilitaet: Optional[Mobilitaet] = None  # not sure what elements are possible here
     sprachkenntnisse: Optional[Kenntnisse] = None
     kenntnisse: Optional[Kenntnisse] = None
     softskills: Optional[List[Text]] = None

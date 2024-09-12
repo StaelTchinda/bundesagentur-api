@@ -1,8 +1,11 @@
-from typing import List, Text
+from typing import List, Optional, Text
 
 from pydantic import BaseModel
 
-from src.applicants.schemas.arbeitsagentur.schemas import BewerberUebersicht, BewerberDetail
+from src.applicants.schemas.arbeitsagentur.schemas import (
+    BewerberUebersicht,
+    BewerberDetail,
+)
 
 
 class FetchDetailedApplicantsResponse(BaseModel):
@@ -21,3 +24,13 @@ class SearchApplicantsResponse(BaseModel):
     applicantRefnrs: List[Text]
     applicantLinks: List[Text]
     applicants: List[BewerberUebersicht]
+
+
+class SearchCriteriaSuggestion(BaseModel):
+    locations: List[Text]
+    jobTitles: List[Text]
+    jobDescriptions: List[Text]
+    competences: List[Text]
+    skills: List[Text]
+    licenses: List[Text]
+    languages: List[Text]

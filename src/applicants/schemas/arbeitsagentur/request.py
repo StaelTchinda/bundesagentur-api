@@ -1,6 +1,16 @@
 from typing import List, Union, Text, Dict
 from pydantic import BaseModel
-from src.applicants.schemas.arbeitsagentur.enums import EducationType, LocationRadius, OfferType, WorkingTime, WorkExperience, ContractType, Disability
+from fastapi import Query
+from src.applicants.schemas.arbeitsagentur.enums import (
+    EducationType,
+    InputWorkingTime,
+    LocationRadius,
+    OfferType,
+    WorkingTime,
+    WorkExperience,
+    ContractType,
+    Disability,
+)
 
 
 class SearchParameters(BaseModel):
@@ -39,4 +49,3 @@ SEARCH_PARAMETERS_TO_GET_PARAMS: Dict[Text, Text] = {
 
     "locations": "arbeitsorte",
 }
-
