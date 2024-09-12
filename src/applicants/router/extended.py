@@ -101,7 +101,7 @@ def fetch_applicants(
         )
         search_result_dict: Dict = api.search_applicants(search_parameters)
         logger.info(
-            f"Fetching resumes from page {page_start + page_idx + 1} with keys: {search_result_dict.keys()}"
+            f"Fetching resumes from page {pages_start + page_idx + 1} with keys: {search_result_dict.keys()}"
         )
         if "messages" in search_result_dict:
             logger.warning(
