@@ -261,11 +261,15 @@ class Lokation(BaseModel):
     def build_location_filter(
         cls, location_keyword: Text, location_radius: Optional[int] = None
     ) -> Callable[["Lokation"], bool]:
-        if location_radius is None:
+        if location_radius is None or location_radius == 0:
+            logger.info(f"Filtering by location: {location_keyword}")
             return lambda location: cls._build_basic_location_filter_(
                 location, location_keyword
             )
         else:
+            logger.info(
+                f"Filtering by location: {location_keyword} with radius: {location_radius}"
+            )
             matching_locations = cls.get_matching_locations(
                 location_keyword, location_radius
             )
