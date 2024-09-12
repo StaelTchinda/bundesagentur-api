@@ -19,15 +19,9 @@ class ApplicantApi:
     )
     api_search_url: Text = f"{api_base_url}/bewerber"
     api_detail_url: Text = f"{api_base_url}/bewerberdetails"
-    token_url: Text = "https://rest.arbeitsagentur.de/oauth/gettoken_cc"
-    auth: Dict[Text, Text] = {
-        "client_id": "919b0af7-6e5f-4542-a7f5-04268b8bae2e",
-        "client_secret": "93fce94c-5be2-4dc8-b040-c62818a4b003",
-        "grant_type": "client_credentials",
-    }
+    api_key: Text = "jobboerse-bewerbersuche-ui"
 
     def __init__(self):
-        self.token: Optional[Text] = None
         pass
 
     def init(self):
@@ -38,6 +32,7 @@ class ApplicantApi:
         if self.token is None:
             logger.error(f"No token received. Response: {response.json()}")
             raise Exception("No token received")
+        pass
 
     def search_applicants(
         self, search_parameters: Optional[SearchParameters] = None
@@ -60,7 +55,7 @@ class ApplicantApi:
         )
         response = requests.get(
             self.api_search_url,
-            headers={"OAuthAccessToken": self.token},
+            headers=self.get_headers(),
             params=request_params,
         )
         logger.info(
@@ -70,5 +65,8 @@ class ApplicantApi:
 
     def get_applicant(self, applicant_id: Text) -> Dict:
         api_url = f"{self.api_detail_url}/{applicant_id}"
-        response = requests.get(api_url, headers={"OAuthAccessToken": self.token})
+        response = requests.get(api_url, headers=self.get_headers())
         return response.json()
+
+    def get_headers(self):
+        return {"X-API-Key": self.api_key}
