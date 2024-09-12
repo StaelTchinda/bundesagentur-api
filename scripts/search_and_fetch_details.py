@@ -47,6 +47,8 @@ def main():
             size=args.page_size
         )
         search_response = SearchApplicantsResponse(**search_response_dict)
+        if search_response.count < args.page_size:
+            break
         all_search_responses.append(search_response)
 
     print(f"Found in total {sum([response.count for response in all_search_responses])} applicants")

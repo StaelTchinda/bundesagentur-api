@@ -26,8 +26,10 @@ class FetchParameters(BaseModel):
     contractType: ContractType = ContractType.UNDEFINED
     disability: Disability = Disability.UNDEFINED
     pages_count: int = 1
-    pages_start: int = 0
+    pages_start: int = 1
     size: int = 25
+
+    locations: Optional[List[Text]] = None
 
     def get_original_search_params(self) -> Iterable[SearchParameters]:
         for page_idx in range(self.pages_start, self.pages_start + self.pages_count):
@@ -41,8 +43,9 @@ class FetchParameters(BaseModel):
                 workExperience=self.workExperience,
                 contractType=self.contractType,
                 disability=self.disability,
-                page=page_idx + 1,
+                page=page_idx,
                 size=self.size,
+                locations=self.locations,
             )
             yield params
 
@@ -58,6 +61,7 @@ class ExtendedSearchParameters(BaseModel):
     career_field: Optional[Text] = None
     working_time: WorkingTime = WorkingTime.UNDEFINED
     location_keyword: Optional[Text] = None
+    location_radius: Optional[int] = None
 
 
 class ExtendedDetailedSearchParameters(BaseModel):

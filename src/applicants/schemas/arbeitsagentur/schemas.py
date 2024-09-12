@@ -1,11 +1,20 @@
-from typing import List, Optional, Union, Text, Dict
+import logging
+from typing import Callable, List, Optional, Union, Text, Dict
 from datetime import date, datetime
 from pydantic import BaseModel, Field, field_validator, AliasChoices
 import re
+import json
 
 from pydantic import BaseModel
 
 from src.applicants.schemas.arbeitsagentur.enums import JobType, WorkingTime
+from src.utils.location.openplz import Locality, get_localities
+from src.utils.location.zip import CountryCode, RadiusLocality, get_localities_in_radius
+from src.configs import DEFAULT_LOGGING_CONFIG
+
+
+logging.basicConfig(**DEFAULT_LOGGING_CONFIG)
+logger = logging.getLogger(__name__)
 
 
 # TODO: better represent optional fields
@@ -173,19 +182,121 @@ class Lokation(BaseModel):
     region: Optional[Text] = None
     land: Optional[Text] = None
 
-    def check_location(self, locationKeyword: Text) -> bool:
-        if locationKeyword is None:
-            raise ValueError("LocationKeyword is None")
+    @classmethod
+    def _map_locality_(cls, locality: Locality) -> "Lokation":
+        return Lokation(
+            ort=locality.name,
+            plz=locality.postalCode,
+            region=locality.district.name,
+            land=locality.federalState.name,  # TODO: Check if this is the correct value
+        )
 
-        if self.ort is not None and locationKeyword in self.ort:
+    @classmethod
+    def _map_radius_locality_(cls, radius_locality: RadiusLocality) -> "Lokation":
+        return Lokation(
+            ort=radius_locality.place_name,
+            plz=radius_locality.postal_code,
+            region=radius_locality.state,
+            land=radius_locality.country_code.value,  # TODO: Check if this is the correct value
+        )
+
+    @classmethod
+    def get_matching_locations(
+        cls, location: Union[Text, int], radius: Optional[int] = None
+    ) -> List["Lokation"]:
+        if location is None:
+            raise ValueError("Location is None")
+
+        main_localities: List[Locality]
+        if isinstance(location, int) or (
+            isinstance(location, Text) and location.isdigit()
+        ):
+            main_localities = get_localities(postalCode=int(location))
+        else:
+            main_localities = get_localities(name=location)
+
+        radius_localities: List[RadiusLocality] = []
+        if radius is not None:
+            for locality in main_localities:
+                radius_localities.extend(
+                    get_localities_in_radius(
+                        CountryCode.DE, locality.postalCode, radius
+                    )
+                )
+
+        matching_locations: List[Lokation] = []
+
+        for locality in main_localities:
+            matching_locations.append(cls._map_locality_(locality))
+
+        for radius_locality in radius_localities:
+            matching_locations.append(cls._map_radius_locality_(radius_locality))
+
+        return matching_locations
+
+    @classmethod
+    def _build_basic_location_filter_(
+        cls, location: "Lokation", location_keyword: Text
+    ) -> bool:
+        if location.ort is not None and re.search(
+            location_keyword, location.ort, re.IGNORECASE
+        ):
             return True
-        elif self.plz is not None and locationKeyword in str(self.plz):
+        elif location.plz is not None and re.search(
+            location_keyword, str(location.plz), re.IGNORECASE
+        ):
             return True
-        elif self.region is not None and locationKeyword in self.region:
+        elif location.region is not None and re.search(
+            location_keyword, location.region, re.IGNORECASE
+        ):
             return True
-        elif self.land is not None and locationKeyword in self.land:
+        elif location.land is not None and re.search(
+            location_keyword, location.land, re.IGNORECASE
+        ):
             return True
-        return False
+        else:
+            return False
+
+    @classmethod
+    def build_location_filter(
+        cls, location_keyword: Text, location_radius: Optional[int] = None
+    ) -> Callable[["Lokation"], bool]:
+        if location_radius is None or location_radius == 0:
+            logger.info(f"Filtering by location: {location_keyword}")
+            return lambda location: cls._build_basic_location_filter_(
+                location, location_keyword
+            )
+        else:
+            logger.info(
+                f"Filtering by location: {location_keyword} with radius: {location_radius}"
+            )
+            matching_locations = cls.get_matching_locations(
+                location_keyword, location_radius
+            )
+            matching_location_orts = set(
+                [location.ort for location in matching_locations]
+            )
+            matching_location_plzs = set(
+                [location.plz for location in matching_locations]
+            )
+            matching_location_regions = set(
+                [location.region for location in matching_locations]
+            )
+            logger.info(
+                f"Matching locations: {matching_location_orts}, {matching_location_plzs}, {matching_location_regions}"
+            )
+
+            def is_in(location: "Lokation") -> bool:
+                if location.ort is not None:
+                    return location.ort in matching_location_orts
+                elif location.plz is not None:
+                    return location.plz in matching_location_plzs
+                elif location.region is not None:
+                    return location.region in matching_location_regions
+                else:
+                    return False
+
+            return is_in
 
 
 class FacettenElement(BaseModel):

@@ -76,7 +76,12 @@ class TestSearchApplicants(unittest.TestCase):
         for applicant in search_response.applicants:
             self.assertIsNotNone(applicant.lokation)
             if applicant.lokation is not None:
-                self.assertRegex(ignore_case_in_regex(applicant.lokation.ort), location)
+                if applicant.lokation.ort is not None:
+                    self.assertRegex(ignore_case_in_regex(applicant.lokation.ort), location)
+                elif applicant.lokation.region is not None:
+                    self.assertRegex(ignore_case_in_regex(applicant.lokation.region), location)
+                else:
+                    self.assertIsNot((applicant.lokation.ort, applicant.lokation.region), (None, None))
         # applicantrefnr = [applicant for x in search_response.applicantRefnrs if "a" in x]
         for applicant in self.db.get_all():
             if applicant.refnr not in search_response.applicantRefnrs:

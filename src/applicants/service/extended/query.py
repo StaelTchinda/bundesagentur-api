@@ -5,15 +5,18 @@ from typing import Callable, List, Optional, Text, Union
 from tinydb import Query
 from tinydb.queries import QueryInstance
 import logging
-
-
 from src.applicants.schemas.arbeitsagentur.enums import WorkingTime
-from src.applicants.schemas.arbeitsagentur.schemas import LebenslaufElement, TimePeriod
+from src.configs import DEFAULT_LOGGING_CONFIG
+
+from src.applicants.schemas.arbeitsagentur.schemas import (
+    LebenslaufElement,
+    Lokation,
+    TimePeriod,
+)
 from src.applicants.schemas.extended.request import (
     ExtendedSearchParameters,
     ExtendedDetailedSearchParameters,
 )
-from src.configs import DEFAULT_LOGGING_CONFIG
 
 
 logging.basicConfig(**DEFAULT_LOGGING_CONFIG)
@@ -122,37 +125,15 @@ def build_search_query(
 
     if search_parameters.location_keyword is not None:
         _applicant = Query()
-        subquery = _applicant.lokation.exists() & (
-            (
-                _applicant.lokation.ort.exists()
-                & search_re_keyword(
-                    _applicant.lokation.ort, search_parameters.location_keyword
-                )
-            )
-            | (
-                _applicant.lokation.land.exists()
-                & search_re_keyword(
-                    _applicant.lokation.land, search_parameters.location_keyword
-                )
-            )
-            | (
-                _applicant.lokation.plz.exists()
-                & search_re_keyword(
-                    _applicant.lokation.plz, search_parameters.location_keyword
-                )
-            )
-            | (
-                _applicant.lokation.bundesland.exists()
-                & search_re_keyword(
-                    _applicant.lokation.bundesland, search_parameters.location_keyword
-                )
-            )
-            | (
-                _applicant.lokation.region.exists()
-                & search_re_keyword(
-                    _applicant.lokation.region, search_parameters.location_keyword
-                )
-            )
+        location_filter = Lokation.build_location_filter(
+            search_parameters.location_keyword, search_parameters.location_radius
+        )
+        test_location = (
+            lambda location: search_parameters.location_keyword is not None
+            and location_filter(Lokation(**location))
+        )
+        subquery = _applicant.lokation.exists() & _applicant.lokation.test(
+            test_location
         )
 
         if query is None:
@@ -198,7 +179,6 @@ def build_detailed_search_query(
         )
         _applicant = Query()
 
-        # todo: make this into BerufsfeldErfahung objects
         def avg_duration_check(applicantExperience) -> bool:
             avg_job_position_years = 0
 
